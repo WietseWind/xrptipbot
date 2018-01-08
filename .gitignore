@@ -1,0 +1,14 @@
+/.config.js
+/config.php
+/cli/process_withdraw/log_processOne.txt
+/cli/reddit/composer.lock
+/cli/reddit/log/fetch_pbs.txt
+/cli/reddit/log/process_messages.txt
+/cli/reddit/oauth2token.json
+/cli/reddit/vendor/
+/nodejs/sendwithdrawreq/app.log
+/nodejs/sendwithdrawreq/node_modules/
+/nodejs/sendwithdrawreq/package-lock.json
+/nodejs/storetransactions/app.log
+/nodejs/storetransactions/node_modules/
+/nodejs/storetransactions/package-lock.json
