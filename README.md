@@ -2,6 +2,17 @@
 
 XRP Tip Bot (reddit, /u/xrptipbot) in PHP + NodeJS
 
+# Todo
+
+This is ugly code, I know. It is, however, functioning very well, and running in a secure environment. There are some things on my personal wishlist for this repo, and I'll try to find/make the time to do this. Wish to help? Contact me @ reddit, /u/pepperew
+
+##### Todo's:
+
+1. Dockerfile, to prepare an out of the box docker container + environment for the code to run, with nodejs, php, nginx, MySQL / MariaDB, etc.
+2. Get rid of the fixed paths (`/data/` etc.)
+3. Make an installer (npm install, php composer, gen. template config file, generate reddit access token)
+4. Exception handling / logging
+
 ## Note
 
 This code needs refactoring, cleanup, etc. etc. - I know. However: I wrote this in two days ;) Will try to find some time.
