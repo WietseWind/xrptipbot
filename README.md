@@ -106,6 +106,29 @@ the token from the reddit API and stores it in a json-file.
 
 Run `composer` to install the PHP deps. in `cli/reddit`.
 
+Run `npm install` in the `nodejs/*` folders to install the NPM modules.
+
+# Application Flow
+
+### Deposits
+
+- `nodejs/storetransactions/app.js` watches wallets
+- All transactions (history + live stream) are posted to the `php/_storetransaction.php` script
+- A crontab scans the DB for all new transactions. If it's a deposit it processed the deposit with `php/__processdeposit.php`
+- If the deposit is processed, a PB to the user is sent using `cli/reddit/send_pb.php`
+
+### Tips
+
+- A crontab checks the unread messages to /u/xrptipbot (that includes mentions) using `cli/reddit/fetch_pbs.php`
+- Another crontab checks all messages in the DB that aren't processed, and decides what to do: `cli/reddit/process_messages.php`
+- A reaction will be sent to the reddit-user using `cli/reddit/send_reaction.php`
+- If it's a valid tip, the balance of the sending and receiving user are updated in the DB
+
+### Withdrawals
+
+- A request to withdraw funds is stored in the database. `cli/process_withdraw/processOne.php` runs every 30 seconds, and processes one withdrawal.
+- `nodejs/sendwithdrawreq/app.js` runs to process the withdrawal by sending a TX to the XRP Ledger using `ripple-lib`.
+
 # Contributing
 
 Fork, change, commit, send pull request. More to come.
