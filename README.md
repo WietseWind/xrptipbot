@@ -4,7 +4,7 @@ XRP Tip Bot (reddit, /u/xrptipbot) in PHP + NodeJS
 
 # Todo
 
-This is ugly code, I know. It is, however, functioning very well, and running in a secure environment. There are some things on my personal wishlist for this repo, and I'll try to find/make the time to do this. Wish to help? Contact me @ reddit, /u/pepperew
+This is ugly code, I know. It is, however, functioning very well, and running in a secure environment. There are some things on my personal wishlist for this repo, and I'll try to find/make the time to do this. Wish to help? Contact me @ reddit, `/u/pepperew`
 
 ##### Todo's:
 
