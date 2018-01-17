@@ -14,7 +14,7 @@ $parent_ids = [];
 if(!empty($reddits)){
     foreach($reddits as $reddit){
         echo " - /r/" . $reddit['subreddit'] . " before [".$reddit['last_id']."] \n";
-        $messages = $reddit_call('/r/'.$reddit['subreddit'].'/comments?show=all&limit=250&before=' . $reddit['last_id'], 'GET');
+        $messages = $reddit_call('/r/'.$reddit['subreddit'].'/comments?limit=100&sort=new', 'GET');
         $first = true;
         $newMsgId = $reddit['last_id'];
         $msgCount = 0;
