@@ -152,3 +152,14 @@ CREATE TABLE `withdraw` (
   KEY `donate` (`donate`),
   KEY `fee` (`fee`)
 ) ENGINE=InnoDB AUTO_INCREMENT=54 DEFAULT CHARSET=utf8mb4;
+-- Create syntax for TABLE 'reddit_comments'
+CREATE TABLE `reddit_comments` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `subreddit` varchar(50) NOT NULL DEFAULT '',
+  `last_id` varchar(50) NOT NULL DEFAULT '',
+  `last_moment` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `seen` int(10) unsigned NOT NULL,
+  `matched` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `subreddit` (`subreddit`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4;

@@ -3,6 +3,7 @@
 /cli/process_withdraw/log_processOne.txt
 /cli/reddit/composer.lock
 /cli/reddit/log/fetch_pbs.txt
+/cli/reddit/log/fetch_comments.txt
 /cli/reddit/log/process_messages.txt
 /cli/reddit/oauth2token.json
 /cli/reddit/vendor/
