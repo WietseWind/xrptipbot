@@ -2,6 +2,17 @@
 
 XRP Tip Bot (reddit, /u/xrptipbot) in PHP + NodeJS
 
+# Todo
+
+This is ugly code, I know. It is, however, functioning very well, and running in a secure environment. There are some things on my personal wishlist for this repo, and I'll try to find/make the time to do this. Wish to help? Contact me @ reddit, `/u/pepperew`
+
+##### Todo's:
+
+1. Dockerfile, to prepare an out of the box docker container + environment for the code to run, with nodejs, php, nginx, MySQL / MariaDB, etc.
+2. Get rid of the fixed paths (`/data/` etc.)
+3. Make an installer (npm install, php composer, gen. template config file, generate reddit access token)
+4. Exception handling / logging
+
 ## Note
 
 This code needs refactoring, cleanup, etc. etc. - I know. However: I wrote this in two days ;) Will try to find some time.
@@ -31,6 +42,12 @@ is symlinked to the HTTP webroot, and a crontab is present to run all the script
 # Fetch Reddit Messages and insert into table message
 * *     * * *   cd /data/cli/reddit; php fetch_pbs.php > log/fetch_pbs.txt
 * *     * * *   sleep 30; cd /data/cli/reddit; php fetch_pbs.php >> log/fetch_pbs.txt
+
+# Fetch Reddit Comments at watched subreddits and insert into table message
+* *     * * *   root    cd /data/cli/reddit; php fetch_comments.php > log/fetch_comments.txt
+* *     * * *   root    sleep 15; cd /data/cli/reddit; php fetch_comments.php > log/fetch_comments.txt
+* *     * * *   root    sleep 30; cd /data/cli/reddit; php fetch_comments.php > log/fetch_comments.txt
+* *     * * *   root    sleep 45; cd /data/cli/reddit; php fetch_comments.php > log/fetch_comments.txt
 
 # Process message and reply
 * *     * * *   cd /data/cli/reddit; php process_messages.php > log/process_messages.txt
