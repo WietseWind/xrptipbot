@@ -43,6 +43,12 @@ is symlinked to the HTTP webroot, and a crontab is present to run all the script
 * *     * * *   cd /data/cli/reddit; php fetch_pbs.php > log/fetch_pbs.txt
 * *     * * *   sleep 30; cd /data/cli/reddit; php fetch_pbs.php >> log/fetch_pbs.txt
 
+# Fetch Reddit Comments at watched subreddits and insert into table message
+* *     * * *   root    cd /data/cli/reddit; php fetch_comments.php > log/fetch_comments.txt
+* *     * * *   root    sleep 15; cd /data/cli/reddit; php fetch_comments.php > log/fetch_comments.txt
+* *     * * *   root    sleep 30; cd /data/cli/reddit; php fetch_comments.php > log/fetch_comments.txt
+* *     * * *   root    sleep 45; cd /data/cli/reddit; php fetch_comments.php > log/fetch_comments.txt
+
 # Process message and reply
 * *     * * *   cd /data/cli/reddit; php process_messages.php > log/process_messages.txt
 * *     * * *   sleep 30; cd /data/cli/reddit; php process_messages.php >> log/process_messages.txt
