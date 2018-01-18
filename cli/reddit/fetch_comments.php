@@ -5,6 +5,8 @@ require_once '/data/db.php';
 
 echo "\nProcessing REDDIT comments (not mentions)...\n";
 
+$table = 'message';
+
 $query = $db->prepare('SELECT * FROM reddit_comments');
 $query->execute();
 $reddits = $query->fetchAll(PDO::FETCH_ASSOC);
@@ -14,7 +16,8 @@ $parent_ids = [];
 if(!empty($reddits)){
     foreach($reddits as $reddit){
         echo " - /r/" . $reddit['subreddit'] . " before [".$reddit['last_id']."] \n";
-        $messages = $reddit_call('/r/'.$reddit['subreddit'].'/comments?limit=100&sort=new', 'GET');
+        $messages = $reddit_call('/r/'.$reddit['subreddit'].'/comments?before=' . $reddit['last_id'], 'GET');
+        // print_r($messages);exit;
         $first = true;
         $newMsgId = $reddit['last_id'];
         $msgCount = 0;
@@ -43,7 +46,7 @@ if(!empty($reddits)){
 
                     try {
                         $query = $db->prepare('
-                            INSERT IGNORE INTO `message`
+                            INSERT IGNORE INTO `'.$table.'`
                                 (`network`, `ext_id`, `type`, `from_user`, `to_user`, `subject`, `message`, `parent_id`, `context`)
                             VALUES
                                 ("reddit", :ext_id, :type, :from_user, :to_user, :subject, :message, :parent_id, :context)
@@ -127,7 +130,7 @@ if(!empty($reddits)){
                         echo "\n  [parent]  -> " . $p->data->name . " by " . $parent_author . ' # ' . $index. " ";
                         if(preg_match("@_@", $index)){
                             try {
-                                $query = $db->prepare('UPDATE `message` SET `parent_author` = :parent_author WHERE `ext_id` = :ext_id AND `network` = "reddit" AND `parent_author` IS NULL LIMIT 1');
+                                $query = $db->prepare('UPDATE `'.$table.'` SET `parent_author` = :parent_author WHERE `ext_id` = :ext_id AND `network` = "reddit" AND `parent_author` IS NULL LIMIT 1');
                                 $query->bindValue(':ext_id',        $index);
                                 $query->bindValue(':parent_author', $parent_author);
                                 $query->execute();
