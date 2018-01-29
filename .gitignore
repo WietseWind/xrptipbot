@@ -13,3 +13,8 @@
 /nodejs/storetransactions/app.log
 /nodejs/storetransactions/node_modules/
 /nodejs/storetransactions/package-lock.json
+/cli/twitter/composer.lock
+/cli/twitter/vendor/
+/cli/twitter/log/fetch_pbs.txt
+/cli/twitter/log/fetch_comments.txt
+/cli/twitter/log/process_messages.txt

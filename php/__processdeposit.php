@@ -87,7 +87,7 @@ if(!empty($o_postdata) && is_object($o_postdata)){
                     $sent_pb = @`cd /data/cli/reddit/; php send_pb.php "$pb_to" "$pb_amount"`;
                 }
                 if ($depositTo['network'] == 'twitter') {
-                    // Todo:twitter
+                    $sent_pb = @`cd /data/cli/twitter/; php send_pb.php "$pb_to" "$pb_amount"`;
                 }
                 /**
                  * END -- SEND ABLY NOTIFICATION
