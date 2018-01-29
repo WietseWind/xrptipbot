@@ -105,7 +105,12 @@ The config is in `config.php` and should look like this:
         'scopes'        => [ 'identity', 'edit', 'history', 'mysubreddits', 'privatemessages', 'read', 'report', 'save', 'submit' ]
     ];
 
-    ///
+    $__TWITTER_CLIENT_CONFIG = [
+        'consumerKey'        => 'xxxxx',
+        'consumerSecret'     => 'yyyyy',
+        'accessToken'        => 'qqqqqq',
+        'accessTokenSecret'  => 'xxxxxx'
+    ];
 
     if(isset($_SERVER["PWD"]) && isset($_SERVER["TERM"]) && $_SERVER["_"]){
         // CLI called
