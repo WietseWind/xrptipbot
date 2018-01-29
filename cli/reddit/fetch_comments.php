@@ -10,13 +10,12 @@ $table = 'message';
 $query = $db->prepare('SELECT * FROM reddit_comments');
 $query->execute();
 $reddits = $query->fetchAll(PDO::FETCH_ASSOC);
-
 $parent_ids = [];
 
 if(!empty($reddits)){
     foreach($reddits as $reddit){
         echo " - /r/" . $reddit['subreddit'] . " before [".$reddit['last_id']."] \n";
-        $messages = $reddit_call('/r/'.$reddit['subreddit'].'/comments?before=' . $reddit['last_id'], 'GET');
+        $messages = $reddit_call('/r/'.$reddit['subreddit'].'/comments', 'GET'); // ?before=' . $reddit['last_id']
         // print_r($messages);exit;
         $first = true;
         $newMsgId = $reddit['last_id'];
@@ -36,11 +35,16 @@ if(!empty($reddits)){
 
             echo "    - [ " . $comment['name'] . " ] " . $comment['author'] . " @ " . $comment['link_title'];
             if(!preg_match("@u\/xrptipbot@i", $comment['body'])){
-                if(preg_match("@(\+[ ]*[0-9\.,]+[ ]*)XRP@i", $comment['body'], $m)){
+                if(preg_match("@(\+[ ]*[0-9\.,]+[ ]*)XRP@msi", $comment['body'], $m) || preg_match("@TIP[ ]*([0-9\.,]+[ ]*)XRP@msi", $comment['body'], $n)){
                     echo "\n";
+                    if(!is_array($m) || !isset($m[1])){
+                        $m = $n;
+                        $m[1] = '+' . $m[1];
+                    }
+
                     echo "        >>> " . $comment['body'];
                     $data = $comment;
-                    $data['body'] .= preg_replace("@[ ]+@", " ", ' -- Short syntax tip: '.$m[1].' /u/xrptipbot');
+                    $data['body'] .= preg_replace("@[ ]+@", " ", "\n".' -- Short syntax tip: '.$m[1].' /u/xrptipbot');
                     print_r($m);
                     // print_r($comment);
 

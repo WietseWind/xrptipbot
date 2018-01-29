@@ -35,7 +35,7 @@ try {
             $msg = '';
             echo "\n -> " . $m['id'] . ' @ ' . $m['network'] . '...' . "\n";
 
-            if($m['type'] == 'mention'){
+            if($m['type'] == 'mention' || $m['type'] == 'sr_reaction'){
                 if(empty($m['parent_author'])){
                     // $msg = "Sorry, cannot determine the user you replied to when mentioning me :(";
                     $msg = '';
