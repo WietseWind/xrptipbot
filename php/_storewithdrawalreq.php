@@ -2,17 +2,18 @@
 
 if(!empty($o_postdata) && is_object($o_postdata) && !empty($o_postdata->name)){
     try {
-        $query = $db->prepare('SELECT * FROM user WHERE username = :name');
+        $query = $db->prepare('SELECT * FROM user WHERE username = :name AND network = :network');
         $query->bindParam(':name', $o_postdata->name);
+        $query->bindParam(':network', $o_postdata->type);
         $query->execute();
         $row = (object) $query->fetch(PDO::FETCH_ASSOC);
 
         if(!empty($row->username) && !empty($row->balance) && $row->balance > 0 && (float) $o_postdata->amount <= (float) $row->balance){
             $query = $db->prepare('
                 INSERT IGNORE INTO `withdraw`
-                    (`user`, `from_wallet`, `to_wallet`, `destination_tag`, `amount`, `ip`, `donate`)
+                    (`user`, `from_wallet`, `to_wallet`, `destination_tag`, `amount`, `ip`, `donate`, `network`)
                 VALUES
-                    (:user, :from_wallet, :to_wallet, :destination_tag, :amount, :ip, :donate)
+                    (:user, :from_wallet, :to_wallet, :destination_tag, :amount, :ip, :donate, :network)
             ');
 
             $amount = (float) @$o_postdata->amount;
@@ -37,6 +38,7 @@ if(!empty($o_postdata) && is_object($o_postdata) && !empty($o_postdata->name)){
             $query->bindValue('amount', $amount);
             $query->bindValue('ip', @$o_postdata->ip);
             $query->bindValue('donate', @$o_postdata->donate);
+            $query->bindValue('network', @$o_postdata->type);
             $query->execute();
 
             $insertId = (int) @$db->lastInsertId();
@@ -50,36 +52,40 @@ if(!empty($o_postdata) && is_object($o_postdata) && !empty($o_postdata->name)){
                     // Process donation
                     $query = $db->prepare('
                         INSERT IGNORE INTO `tip`
-                            (`amount`, `from_user`, `to_user`, `sender_balance`, `recipient_balance`)
+                            (`amount`, `from_user`, `to_user`, `sender_balance`, `recipient_balance`, `network`)
                         VALUES
-                            (:amount, :from_user, :to_user, :sender_balance, :recipient_balance)
+                            (:amount, :from_user, :to_user, :sender_balance, :recipient_balance, :network)
                     ');
                     $query->bindValue(':amount', (float) $o_postdata->donate);
                     $query->bindValue(':from_user', $o_postdata->name);
                     $query->bindValue(':to_user', 'xrptipbot');
                     $query->bindValue(':sender_balance', - (float) $o_postdata->donate);
                     $query->bindValue(':recipient_balance', + (float) $o_postdata->donate);
+                    $query->bindValue(':network', $o_postdata->type);
                     $query->execute();
 
                     $tip_insertId = (int) @$db->lastInsertId();
                     $json['tip_id'] = $tip_insertId;
 
                     if(!empty($tip_insertId)){
-                        $query = $db->prepare('UPDATE `user` SET `balance` = `balance` + :tip WHERE `username` = :user LIMIT 1');
+                        $query = $db->prepare('UPDATE `user` SET `balance` = `balance` + :tip WHERE `username` = :user AND `network` = :network LIMIT 1');
                         $query->bindValue(':tip', (float) $o_postdata->donate);
                         $query->bindValue(':user', 'xrptipbot');
+                        $query->bindValue(':network', $o_postdata->type);
                         $query->execute();
 
-                        $query = $db->prepare('UPDATE `user` SET `balance` = `balance` - :tip WHERE `username` = :user LIMIT 1');
+                        $query = $db->prepare('UPDATE `user` SET `balance` = `balance` - :tip WHERE `username` = :user AND `network` = :network LIMIT 1');
                         $query->bindValue(':tip', (float) $o_postdata->donate);
                         $query->bindValue(':user', $o_postdata->name);
+                        $query->bindValue(':network', $o_postdata->type);
                         $query->execute();
                     }
                 }
 
-                $query = $db->prepare('UPDATE `user` SET `balance` = `balance` - :withdraw_amount WHERE `username` = :user LIMIT 1');
+                $query = $db->prepare('UPDATE `user` SET `balance` = `balance` - :withdraw_amount WHERE `username` = :user AND `network` = :network LIMIT 1');
                 $query->bindValue(':withdraw_amount', $amount);
                 $query->bindValue(':user', $o_postdata->name);
+                $query->bindValue(':network', $o_postdata->type);
                 $json['balance'] = $query->execute();
             }
         }

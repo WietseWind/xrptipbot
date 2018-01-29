@@ -15,7 +15,8 @@ if(!empty($o_postdata) && is_object($o_postdata)){
                     tip.`from_user` as `user`,
                     tip.`to_user` as `to`,
                     tip.`amount`,
-                    'tip' as `type`
+                    'tip' as `type`,
+                    tip.`network`
                 FROM `tip`
                 -- WHERE tip.`from_user` != 'pepperew'
 
@@ -27,7 +28,8 @@ if(!empty($o_postdata) && is_object($o_postdata)){
                     deposit.`user` as `user`,
                     null as `to`,
                     deposit.`amount`,
-                    'deposit' as `type`
+                    'deposit' as `type`,
+                    deposit.`network`
                 FROM `deposit`
                 -- WHERE `user` != 'pepperew'
 
@@ -39,7 +41,8 @@ if(!empty($o_postdata) && is_object($o_postdata)){
                     withdraw.`user` as `user`,
                     null as `to`,
                     withdraw.`amount`,
-                    'withdraw' as `type`
+                    'withdraw' as `type`,
+                    withdraw.`network`
                 FROM `withdraw`
                 WHERE `amount` != 0
                 -- WHERE `user` != 'pepperew'

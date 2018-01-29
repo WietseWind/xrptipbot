@@ -15,9 +15,9 @@ if(!empty($o_postdata) && is_object($o_postdata)){
 
             $query = $db->prepare('
                 INSERT IGNORE INTO `deposit`
-                    (`tx`, `from_wallet`, `to_wallet`, `destination_tag`, `user`, `ledger`, `amount`, `balance_pre`, `balance_post`)
+                    (`tx`, `from_wallet`, `to_wallet`, `destination_tag`, `user`, `ledger`, `amount`, `balance_pre`, `balance_post`, `network`)
                 VALUES
-                    (:tx, :from_wallet, :to_wallet, :destination_tag, :user, :ledger, :amount, :balance_pre, :balance_post)
+                    (:tx, :from_wallet, :to_wallet, :destination_tag, :user, :ledger, :amount, :balance_pre, :balance_post, :network)
             ');
 
             $newBalance = ((float) $depositTo['balance']) + ((float) $o_postdata->xrp);
@@ -31,6 +31,7 @@ if(!empty($o_postdata) && is_object($o_postdata)){
             $query->bindParam(':amount', $o_postdata->xrp);
             $query->bindParam(':balance_pre', $depositTo['balance']);
             $query->bindParam(':balance_post', $newBalance);
+            $query->bindParam(':network', $depositTo['network']);
             $query->execute();
             $txInsertId = (int) @$db->lastInsertId();
 
@@ -43,9 +44,10 @@ if(!empty($o_postdata) && is_object($o_postdata)){
                  * UPDATE THE BALANCE
                  **/
                 $query = $db->prepare('
-                    UPDATE `user` SET `balance` = (`balance` + :amount) WHERE `username` = :user LIMIT 1
+                    UPDATE `user` SET `balance` = (`balance` + :amount) WHERE `username` = :user AND `network` = :network LIMIT 1
                 ');
                 $query->bindParam(':user', $depositTo['username']);
+                $query->bindParam(':network', $depositTo['network']);
                 $query->bindParam(':amount', $o_postdata->xrp);
                 $query->execute();
                 /**
@@ -80,7 +82,13 @@ if(!empty($o_postdata) && is_object($o_postdata)){
 
                 $pb_to = $depositTo['username'];
                 $pb_amount = $o_postdata->xrp;
-                $sent_pb = @`cd /data/cli/reddit/; php send_pb.php "$pb_to" "$pb_amount"`;
+
+                if ($depositTo['network'] == 'reddit') {
+                    $sent_pb = @`cd /data/cli/reddit/; php send_pb.php "$pb_to" "$pb_amount"`;
+                }
+                if ($depositTo['network'] == 'twitter') {
+                    // Todo:twitter
+                }
                 /**
                  * END -- SEND ABLY NOTIFICATION
                  **/
