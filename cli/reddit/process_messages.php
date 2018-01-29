@@ -41,10 +41,11 @@ try {
                     $msg = '';
                 }else{
                     if($m['parent_author'] == $m['from_user']){
-                        $msg = "Do you want to tip yourself?! ;)";
+                        // $msg = "Do you want to tip yourself?! ;)";
+                        $msg = '';
                     }else {
                         $_toParse = html_entity_decode(trim(preg_replace("@[t\r\n ]+@", " ", $m['message'])));
-                        preg_match_all("@\+[ <&lgt;\t\r\n]*([0-9,\.]+)[&lgt;> \t\r\n]*[XRPxrp]*@ms", $_toParse, $match);
+                        preg_match_all("@\+[ <&lgt;\t\r\n]*([0-9,\.]+)[&lgt;> \t\r\n\/u]*[\/uXRPxrp]*@ms", $_toParse, $match);
 
                         if(!empty($match[1][0])) {
                             $amount = round( (float) str_replace(",", ".", $match[1][0]), 8);
