@@ -39,6 +39,8 @@ This repo should live in `/data/` (the paths are currently hardcoded). The PHP f
 is symlinked to the HTTP webroot, and a crontab is present to run all the scripts:
 
 ```
+### REDDIT ###
+
 # Fetch Reddit Messages and insert into table message
 * *     * * *   cd /data/cli/reddit; php fetch_pbs.php > log/fetch_pbs.txt
 * *     * * *   sleep 30; cd /data/cli/reddit; php fetch_pbs.php >> log/fetch_pbs.txt
@@ -51,9 +53,19 @@ is symlinked to the HTTP webroot, and a crontab is present to run all the script
 * *     * * *   root    sleep 40; cd /data/cli/reddit; php fetch_comments.php > log/fetch_comments.txt
 * *     * * *   root    sleep 50; cd /data/cli/reddit; php fetch_comments.php > log/fetch_comments.txt
 
-# Process message and reply
+# Process Reddit message and reply
 * *     * * *   cd /data/cli/reddit; php process_messages.php > log/process_messages.txt
 * *     * * *   sleep 30; cd /data/cli/reddit; php process_messages.php >> log/process_messages.txt
+
+### TWITTER ###
+
+# Fetch Twitter Messages and insert into table message
+* *     * * *   cd /data/cli/twitter; php fetch_pbs.php > log/fetch_pbs.txt
+* *     * * *   sleep 30; cd /data/cli/twitter; php fetch_pbs.php >> log/fetch_pbs.txt
+
+# Process Twitter message and reply
+* *     * * *   cd /data/cli/twitter; php process_messages.php > log/process_messages.txt
+* *     * * *   sleep 30; cd /data/cli/twitter; php process_messages.php >> log/process_messages.txt
 
 # Process withdrawals
 * *     * * *   cd /data/cli/process_withdraw; php processOne.php > log_processOne.txt
