@@ -14,8 +14,8 @@ try {
           `to`.`username` as _to_user_name,
           `to`.`balance` as _to_user_balance
         FROM  `message`
-        LEFT JOIN `user` as `from` ON (`from`.`username` = `message`.`from_user`)
-        LEFT JOIN `user` as `to` ON (`to`.`username` = `message`.`parent_author`)
+        LEFT JOIN `user` as `from` ON (`from`.`username` = `message`.`from_user` AND `from`.`network` = `message`.`network`)
+        LEFT JOIN `user` as `to` ON (`to`.`username` = `message`.`parent_author` AND `to`.`network` = `message`.`network`)
         WHERE
             `processed` < 1 AND
             `message`.`network` = "reddit" AND
@@ -86,7 +86,7 @@ try {
 
                                         // Process TIP
                                         $query = $db->prepare('INSERT IGNORE INTO `tip`
-                                                                (`amount`, `from_user`, `to_user`, `reddit_post`, `sender_balance`, `recipient_balance`)
+                                                                (`amount`, `from_user`, `to_user`, `message`, `sender_balance`, `recipient_balance`)
                                                                     VALUES
                                                                 (:amount, :from, :to, :id, :senderbalance, :recipientbalance)
                                         ');
