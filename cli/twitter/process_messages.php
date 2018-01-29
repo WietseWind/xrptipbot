@@ -33,14 +33,15 @@ try {
 
             if($m['type'] == 'mention'){
                 if(empty($m['parent_author'])){
-                    $msg = "Sorry, cannot determine the user you replied to when mentioning me :(";
-                    // $msg = '';
+                    // $msg = "Sorry, cannot determine the user you replied to when mentioning me :(";
+                    $msg = '';
                 }else{
                     if(strtolower($m['parent_author']) == strtolower($m['from_user'])){
-                        $msg = "Do you want to tip yourself?! ;)";
+                        // $msg = "Sorry @".$m['from_user'].", this didn't work. You replied to a tweet posted by yourself.";
+                        $msg = '';
                     }else {
                         $_toParse = html_entity_decode(trim(preg_replace("@[t\r\n ]+@", " ", $m['message'])));
-                        preg_match_all("@\+[ <&lgt;\t\r\n]*([0-9,\.]+)[&lgt;> \t\r\n]*[XRPxrp]*@ms", $_toParse, $match);
+                        preg_match_all("@\+[ <&lgt;\t\r\n]*([0-9,\.]+)[&lgt;> \t\r\n\@\/u]*[\@\/uXRPxrp]*@ms", $_toParse, $match);
 
                         if(!empty($match[1][0])) {
                             $amount = round( (float) str_replace(",", ".", $match[1][0]), 8);
@@ -116,13 +117,14 @@ try {
                         }else {
                             // $msg  = "<< PARSE MSG, NO MATCH >>: [" . $m['message'] . "] \n";
                             // $msg .= "\n------------------------------------------\n";
-                            $msg = "Sorry, I couldn't find the amount of #XRP to tip... Plase use the format as described in the Howto at https://www.xrptipbot.com/howto";
-                            // $msg = '';
+                            // $msg = "Sorry, I couldn't find the amount of #XRP to tip... Plase use the format as described in the Howto at https://www.xrptipbot.com/howto";
+                            $msg = '';
                         }
                     }
                 }
             }else{
-                $msg = "Sorry, I only understand comments (when I am mentioned). For more information check the Howto at https://www.xrptipbot.com/howto or contact the developer of the #XRP Tip Bot, @WietseWind";
+                // $msg = "Sorry, I only understand comments (when I am mentioned). For more information check the Howto at https://www.xrptipbot.com/howto or contact the developer of the #XRP Tip Bot, @WietseWind";
+                $msg = "";
             }
 
             if(strtolower($m['parent_author']) == 'xrptipbot' && strtolower($m['to_user']) == 'xrptipbot'){
@@ -137,6 +139,7 @@ try {
             echo "\n--- Sending reply --- ... \n";
             $to_post = $m['from_user']. '/status/' . $m['ext_id'];
             $msg_escaped = str_replace("'", "'\"'\"'", $msg);
+            $msg_escaped = trim(preg_replace("@[ \t\r\n]+@", " ", $msg_escaped));
             echo `cd /data/cli/twitter; php send_reaction.php '$to_post' '$msg_escaped'`;
             sleep(2);
         }
