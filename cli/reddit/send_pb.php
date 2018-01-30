@@ -9,6 +9,6 @@ print_r($reddit_call('/api/compose', 'POST', [
     'api_type' => 'json',
     'to' => $to,
     'subject' => 'Deposit of XRP confirmed :)',
-    'text' => "Your deposit of **$amount XRP** just came trough :D\n\nGreat! Happy tipping.\n\nMore info: https://www.xrptipbot.com/howto",
+    'text' => "Your deposit of **$amount XRP** just came through :D\n\nGreat! Happy tipping.\n\nMore info: https://www.xrptipbot.com/howto",
 ]));
 
