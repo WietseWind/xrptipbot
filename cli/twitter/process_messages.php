@@ -101,13 +101,17 @@ try {
                                         $is_valid_tip = true;
 
                                         if(!empty($insertId)) {
-                                            $query = $db->prepare('UPDATE `user` SET `balance` = `balance` - :amount WHERE username = :from LIMIT 1');
+                                            $network = 'twitter';
+
+                                            $query = $db->prepare('UPDATE `user` SET `balance` = `balance` - :amount WHERE username = :from AND `network` = :network LIMIT 1');
                                             $query->bindValue(':amount', $amount);
+                                            $query->bindValue(':network', $network);
                                             $query->bindValue(':from', $m['from_user']);
                                             $query->execute();
 
-                                            $query = $db->prepare('UPDATE `user` SET `balance` = `balance` + :amount WHERE username = :to LIMIT 1');
+                                            $query = $db->prepare('UPDATE `user` SET `balance` = `balance` + :amount WHERE username = :to AND `network` = :network LIMIT 1');
                                             $query->bindValue(':amount', $amount);
+                                            $query->bindValue(':network', $network);
                                             $query->bindValue(':to', $m['parent_author']);
                                             $query->execute();
                                         }
