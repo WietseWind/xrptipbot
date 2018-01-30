@@ -35,7 +35,7 @@ if(!empty($reddits)){
 
             echo "    - [ " . $comment['name'] . " ] " . $comment['author'] . " @ " . $comment['link_title'];
             if(!preg_match("@u\/xrptipbot@i", $comment['body'])){
-                if(preg_match("@(\+[ ]*[0-9\.,]+[ ]*)XRP@msi", $comment['body'], $m) || preg_match("@TIP[ ]*([0-9\.,]+[ ]*)XRP@msi", $comment['body'], $n)){
+                if((preg_match("@(\+[ ]*[0-9\.,]+[ ]*)XRP@msi", $comment['body'], $m) || preg_match("@TIP[ ]*([0-9\.,]+[ ]*)XRP@msi", $comment['body'], $n)) && preg_match("@^TIP|[ ]+TIP|TIP[ ]+@i", $comment['body'])){
                     echo "\n";
                     if(!is_array($m) || !isset($m[1])){
                         $m = $n;
