@@ -37,17 +37,20 @@ if(!empty($mentions)) {
                 $type = 'mention';
                 $context = '/' . @$m->user->screen_name . '/status/' . @$m->id;
 
+                $toSelf = (@$m->user->screen_name == @$m->in_reply_to_screen_name);
+
                 $query->bindValue('ext_id',        @$m->id);
-                if (!empty(@$m->in_reply_to_status_id)) {
+                if (!empty(@$m->in_reply_to_status_id) && !$toSelf) {
                     $query->bindValue('parent_id',     @$m->in_reply_to_status_id);
                     $query->bindValue('parent_author', @$m->in_reply_to_screen_name);
                     $query->bindValue('to_user',       @$m->in_reply_to_screen_name);
                 } else {
-                    if (!empty(@$m->in_reply_to_screen_name)) {
+                    if (!empty(@$m->in_reply_to_screen_name) && !$toSelf) {
                         $query->bindValue('parent_id',     0);
                         $query->bindValue('parent_author', @$m->in_reply_to_screen_name);
                         $query->bindValue('to_user',       @$m->in_reply_to_screen_name);
                     } else {
+                        // Not a reaction so parse mentions, or toSelf (so probably meant to tip the first mentioned user)
                         preg_match_all("@\@[a-zA-Z0-9_-]+@", $m->full_text, $usrMatch);
                         $pUser = '';
                         // Try to match any (first) user
