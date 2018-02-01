@@ -75,10 +75,10 @@ try {
                                             if(!empty($bid)){
                                                 $usdamount = ' (' . number_format($bid * $amount, 2, '.', '') . ' USD)';
                                             }
-                                            $msg = 'Awesome @' . $m['from_user'] . ', you have tipped ' . $amount . ' #XRP' . $usdamount . ' to @' . $m['parent_author'] . '!';
-                                            if(empty($m['_to_user_name'])){
-                                                $msg .= "\n".'(This is the first tip sent to @' . $m['parent_author'] . ' :D)';
-                                            }
+                                            $msg = '@' . $m['parent_author'] . ' You have received a tip: ' . $amount . ' #XRP' . $usdamount . ' from @' . $m['from_user'] . ' ';
+                                            // if(empty($m['_to_user_name'])){
+                                                // $msg .= "\n".'(This is the first tip sent to @' . $m['parent_author'] . ' :D)';
+                                            // }
                                         }
 
                                         // Process TIP
