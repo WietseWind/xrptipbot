@@ -49,7 +49,7 @@ var _processTransaction = function () {
         "Fee" : _fee+"",
         "Destination" : payTo,
         "DestinationTag" : payTo_tag,
-        "Amount" : (xrpAmount*1000*1000)+"",
+        "Amount" : (xrpAmount*1000*1000).toFixed(0)+"",
         "LastLedgerSequence" : closedLedger+ledgerAwait,
         "Sequence" : accInfo.sequence
      }
