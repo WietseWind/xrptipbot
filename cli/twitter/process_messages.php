@@ -51,10 +51,10 @@ try {
                             }
 
                             if(substr_count($amount, '.') > 1) {
-                                $msg = "Sorry, I don't know where the decimal sign and the thousands separators are. Please use only a dot as a decimal sign, and do not use a thousands separator.";
+                                $msg = '@'.$m['from_user'] . " Sorry, I don't know where the decimal sign and the thousands separators are. Please use only a dot as a decimal sign, and do not use a thousands separator.";
                             }else {
                                 if(empty($m['_from_user_name'])){
-                                    $msg = "You cannot send tips untill you deposit some #XRP at https://www.xrptipbot.com/deposit ...";
+                                    $msg = '@'.$m['from_user'] . " You cannot send tips untill you deposit some #XRP at https://www.xrptipbot.com/deposit ...";
                                 }else{
 
                                     if(empty($m['_to_user_name'])){
@@ -65,10 +65,10 @@ try {
                                     }
 
                                     if($m['_from_user_balance'] < $amount){
-                                        $msg = 'Awwww... Your Tip Bot balance is too low :( Please deposit some #XRP at https://www.xrptipbot.com/deposit first and tip @'.$m['parent_author'].' again.';
+                                        $msg = '@'.$m['from_user'].' Awwww... Your Tip Bot balance is too low :( Please deposit some #XRP at https://www.xrptipbot.com/deposit first and tip @'.$m['parent_author'].' again.';
                                     }else{
                                         if(strtolower($m['parent_author']) == 'xrptipbot'){
-                                            $msg = 'Thank you so much! Your donation to me, the one and only #XRP Tip Bot, is very much appreciated!';
+                                            $msg = '@'.$m['from_user'].' Thank you so much! Your donation to me, the one and only #XRP Tip Bot, is very much appreciated!';
                                         }else{
                                             $usdamount = '';
                                             $bid = (float) @json_decode(@file_get_contents('https://www.bitstamp.net/api/v2/ticker_hour/xrpusd/', false, @stream_context_create(['http'=>['timeout'=>10]])))->bid;
