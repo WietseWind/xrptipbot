@@ -124,11 +124,19 @@ The config is in `config.php` and should look like this:
         'accessTokenSecret'  => 'xxxxxx'
     ];
 
+    $__TWILIO_CLIENT_CONFIG = [
+        'project' => 'xxx',
+        'key'     => 'yyy',
+        'to'      => '+31xx',
+        'from'    => '+32xx'
+    ];
+
     if(isset($_SERVER["PWD"]) && isset($_SERVER["TERM"]) && $_SERVER["_"]){
         // CLI called
         $configJson = json_encode([
             'wallets' => $__WALLETS,
             'secrets' => array_flip($__SECRETS),
+            'twilio'  => $__TWILIO_CLIENT_CONFIG
         ]);
         file_put_contents('/data/.config.js', $configJson);
     }

@@ -2,9 +2,13 @@ const RippleAPI = require('ripple-lib').RippleAPI
 const api       = new RippleAPI({ server: 'wss://s1.ripple.com' }) // Public rippled server
 const fetch     = require('node-fetch')
 const fs        = require('fs')
+const twilio    = require('twilio')
 
 let rawSecretData = fs.readFileSync('/data/.config.js');
-let wallets       = JSON.parse(rawSecretData).secrets
+let configFile = JSON.parse(rawSecretData)
+let wallets = configFile.secrets
+
+var twilioClient = new twilio(configFile.twilio.project, configFile.twilio.key);
 
 var closedLedger = 0
 var fee = 0
@@ -105,13 +109,27 @@ var _lastClosedLedger = function (ledgerIndex) {
       }).then(function(d){
         console.log('<< TX RESPONSE @ L:' + (closedLedger-tx_at_ledger) + '] >> ', d)
         tx_result = d
+
         process.exit(0)
       }).catch(function(e,x){
       })
     }else{
       if(signed_tx !== null && (closedLedger-tx_at_ledger) > ledgerAwait){
         console.log('TX FAILED')
-        process.exit(1)
+
+        twilioClient.messages.create({
+            body: 'TipBot withdrawal stuck!',
+            to: configFile.twilio.to,
+            from: configFile.twilio.from
+        })
+        .then(function (message) {
+          // do nothing, at least we tried
+          process.exit(1)
+        })
+
+        setTimeout(function () {
+          process.exit(1)
+        }, 3000)
       }
     }
   }
