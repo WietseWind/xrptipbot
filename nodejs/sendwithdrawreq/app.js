@@ -176,14 +176,14 @@ api.on('disconnected', (code) => {
 api.connect().then(() => {
 // Connected
   api.getServerInfo().then(function (server) {
-    fee = parseFloat(server.validatedLedger.baseFeeXRP)*1000*1000
+    fee = (parseFloat(server.validatedLedger.baseFeeXRP) * 1000 * 1000).toFixed(0)
     console.log('Server base fee: ', fee)
     _lastClosedLedger(server.validatedLedger.ledgerVersion)
     _bootstrap()
 
     // Todo: promises, bootstrap, lastClosedLedger, processTransaction
     api.getFee().then(function(e){
-      _fee = parseFloat(e)*1000*1000
+      _fee = (parseFloat(e) * 1000 * 1000).toFixed(0)
       if(_fee !== fee && parseFloat(_fee) > parseFloat(fee)){
         fee = _fee
         console.log('New estimated fee: ', fee)

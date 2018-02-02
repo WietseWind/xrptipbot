@@ -44,7 +44,7 @@ try {
                         preg_match_all("@\+[ <&lgt;\t\r\n]*([0-9,\.]+)[&lgt;> \t\r\n\@\/u]*[\@\/uXRPxrp]*@ms", $_toParse, $match);
 
                         if(!empty($match[1][0])) {
-                            $amount = round( (float) str_replace(",", ".", $match[1][0]), 8);
+                            $amount = round( (float) str_replace(",", ".", $match[1][0]), 6);
 
                             if ((float) $amount > $__MAX_TIP_AMOUNT) {
                                 $amount = $__MAX_TIP_AMOUNT;
