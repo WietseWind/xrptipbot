@@ -4,18 +4,28 @@ if(!empty($o_postdata) && is_object($o_postdata) && !empty($o_postdata->name)){
     try {
         $query = $db->prepare('
             INSERT IGNORE INTO `user`
-                (`username`, `last_login`, `create_reason`, `network`)
+                (`username`, `last_login`, `create_reason`, `network`, `userid`)
             VALUES
-                (:name, CURRENT_TIMESTAMP, "LOGIN", :network)
+                (:name, CURRENT_TIMESTAMP, "LOGIN", :network, :userid)
         ');
         $query->bindParam(':name', $o_postdata->name);
         $query->bindParam(':network', $o_postdata->type);
+        $userid = null;
+        if (isset($o_postdata->userid)) {
+            $userid = $o_postdata->userid;
+        }
+        $query->bindParam(':userid', $userid);
         $query->execute();
 
         $insertId = (int) @$db->lastInsertId();
 
         if(empty($insertId)){
-            $query = $db->prepare('UPDATE `user` SET `last_login` = CURRENT_TIMESTAMP WHERE `username` = :name AND `network` = :network LIMIT 1');
+            if (isset($o_postdata->userid)) {
+                $query = $db->prepare('UPDATE `user` SET `last_login` = CURRENT_TIMESTAMP, `userid` = :userid WHERE `username` = :name AND `network` = :network LIMIT 1');
+                $query->bindParam(':userid', $o_postdata->userid);
+            } else {
+                $query = $db->prepare('UPDATE `user` SET `last_login` = CURRENT_TIMESTAMP WHERE `username` = :name AND `network` = :network LIMIT 1');
+            }
             $query->bindParam(':name', $o_postdata->name);
             $query->bindParam(':network', $o_postdata->type);
             $query->execute();
