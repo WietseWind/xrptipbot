@@ -60,7 +60,7 @@ client.on('message', msg => {
     } else if (fromUid === toUid) {
       msg.reply('You cannot tip yourself')
     } else {
-      let cmd = spawn('/usr/bin/php', [ '/data/cli/discord/process.php', fromUid, toUid, tipAmount ]) // , ['-lh', '/tmp']
+      let cmd = spawn('/usr/bin/php', [ '/data/cli/discord/process.php', fromUid, toUid, tipAmount, toUsername ]) // , ['-lh', '/tmp']
       cmd.stdout.on('data', function (data) {
         // msg.reply('Tipped **' + tipAmount + ' XRP** to <@' + toUid + '> :tada:')
         msg.reply(data.toString().trim())

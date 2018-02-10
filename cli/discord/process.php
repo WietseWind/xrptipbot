@@ -6,6 +6,7 @@ require_once '/data/db.php';
 $from = @$_SERVER["argv"][1];
 $to = @$_SERVER["argv"][2];
 $amount = (float) @$_SERVER["argv"][3];
+$toname = @$_SERVER["argv"][4];
 
 try {
     $query = $db->prepare('
@@ -36,8 +37,9 @@ try {
     } else{
         if(empty($uto)){
             // Create TO user
-            $query = $db->prepare('INSERT IGNORE INTO user (username, create_reason, network) VALUES (:username, "TIPPED", "discord")');
+            $query = $db->prepare('INSERT IGNORE INTO user (username, userid, create_reason, network) VALUES (:username, :userid, "TIPPED", "discord")');
             $query->bindValue(':username', $to);
+            $query->bindValue(':userid', $toname);
             $query->execute();
             $uto['balance'] = 0;
         }

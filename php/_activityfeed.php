@@ -4,8 +4,10 @@ if(!empty($o_postdata) && is_object($o_postdata)){
     try {
         $query = $db->prepare("
             SELECT
-                *,
-                CONCAT(SUBSTRING(UPPER(type),1,1),'#',id) as id
+                G1.*,
+                CONCAT(SUBSTRING(UPPER(type),1,1),'#',id) as id,
+                ufrom.userid as user_id,
+                uto.userid as to_id
             FROM
             (
 
@@ -48,6 +50,10 @@ if(!empty($o_postdata) && is_object($o_postdata)){
                 -- WHERE `user` != 'pepperew'
 
             ) G1
+            LEFT JOIN
+                `user` ufrom ON (ufrom.`username` = G1.`user`)
+            LEFT JOIN
+                `user` uto ON (uto.`username` = G1.`to`)
             ORDER BY moment DESC
         ");
         $query->execute();
