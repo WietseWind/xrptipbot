@@ -86,6 +86,16 @@ if(!empty($mentions)) {
             catch (\Throwable $e) {
                 echo "\n ERROR: " . $e->getMessage() . "\n";
             }
+        } else {
+            echo "\n [[ NO REGEXP MATCH ]] - [Tweet:";
+            echo $m->id;
+            echo "] - ";
+            echo @$m->user->screen_name;
+            echo " <in reply to> ";
+            echo @$m->in_reply_to_screen_name;
+            echo " [Tweet: " . @$m->in_reply_to_status_id . "]\n";
+            echo "        > " . $m->full_text;
+            echo "\n";
         }
     }
 }
