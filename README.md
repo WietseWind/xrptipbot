@@ -130,13 +130,18 @@ The config is in `config.php` and should look like this:
         'to'      => '+31xx',
         'from'    => '+32xx'
     ];
+    
+    $__DISCORD_BOT = [
+        'secret' => 'xxxx',
+    ];
 
     if(isset($_SERVER["PWD"]) && isset($_SERVER["TERM"]) && $_SERVER["_"]){
         // CLI called
         $configJson = json_encode([
             'wallets' => $__WALLETS,
             'secrets' => array_flip($__SECRETS),
-            'twilio'  => $__TWILIO_CLIENT_CONFIG
+            'twilio'  => $__TWILIO_CLIENT_CONFIG,
+            'discord' => $__DISCORD_BOT,
         ]);
         file_put_contents('/data/.config.js', $configJson);
     }
