@@ -30,14 +30,19 @@ client.on('message', msg => {
 
     var toUid = ''
     var toUsername = ''
+    var tipbotMentioned = false
 
-    var text = msg.content.replace(/<@([0-9]+)>/g, function (match, contents, offset, input_string) {
-      var uid = match.replace(/^<@/, '').replace(/>$/, '')
+    var text = msg.content.replace(/<@\!*([0-9]+)>/g, function (match, contents, offset, input_string) {
+      var uid = match.replace(/^<@\!*/, '').replace(/>$/, '')
       var user = msg.mentions.users.get(uid)
 
       var username = ''
       if (Object.keys(user).indexOf('username') > -1) {
         username = user.username
+      }
+
+      if (username.toLowerCase() === 'xrptipbot') {
+        tipbotMentioned = true
       }
 
       if (uid !== fromUid && username !== 'XRPTipBot') {
@@ -49,23 +54,25 @@ client.on('message', msg => {
       }
     })
 
-    if (isNaN(tipAmount) || tipAmount > 5 || tipAmount === 0 || tipAmount < 0) {
-      if (tipAmount > 5) {
-        msg.reply('There\'s a tip maximum of 5 XRP')
+    if (tipbotMentioned) {
+      if (isNaN(tipAmount) || tipAmount > 5 || tipAmount === 0 || tipAmount < 0) {
+        if (tipAmount > 5) {
+          msg.reply('There\'s a tip maximum of 5 XRP')
+        } else {
+          msg.reply('Invalid tip amount: "' + tip[1] + '"')
+        }
+      } else if (toUid === '') {
+        msg.reply('Cannot detect who you wanted to tip, please mention the user to be tipped :innocent:')
+      } else if (fromUid === toUid) {
+        msg.reply('You cannot tip yourself')
       } else {
-        msg.reply('Invalid tip amount: "' + tip[1] + '"')
+        let cmd = spawn('/usr/bin/php', [ '/data/cli/discord/process.php', fromUid, toUid, tipAmount, toUsername ]) // , ['-lh', '/tmp']
+        cmd.stdout.on('data', function (data) {
+          // msg.reply('Tipped **' + tipAmount + ' XRP** to <@' + toUid + '> :tada:')
+          msg.reply(data.toString().trim())
+          // msg.channel.send()
+        });
       }
-    } else if (toUid === '') {
-      msg.reply('Cannot detect who you wanted to tip, please mention the user to be tipped :innocent:')
-    } else if (fromUid === toUid) {
-      msg.reply('You cannot tip yourself')
-    } else {
-      let cmd = spawn('/usr/bin/php', [ '/data/cli/discord/process.php', fromUid, toUid, tipAmount, toUsername ]) // , ['-lh', '/tmp']
-      cmd.stdout.on('data', function (data) {
-        // msg.reply('Tipped **' + tipAmount + ' XRP** to <@' + toUid + '> :tada:')
-        msg.reply(data.toString().trim())
-        // msg.channel.send()
-      });
     }
   }
 });
