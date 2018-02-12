@@ -7,6 +7,7 @@ $from = @$_SERVER["argv"][1];
 $to = @$_SERVER["argv"][2];
 $amount = (float) @$_SERVER["argv"][3];
 $toname = @$_SERVER["argv"][4];
+$guild = @$_SERVER["argv"][5];
 
 try {
     $query = $db->prepare('
@@ -52,9 +53,9 @@ try {
         $msg = 'Tipped **' . $amount . ' XRP**'.$usdamount.' to <@' . $to . '> :tada:';
 
         $query = $db->prepare('INSERT IGNORE INTO `tip`
-                                (`amount`, `from_user`, `to_user`, `sender_balance`, `recipient_balance`, `network`)
+                                (`amount`, `from_user`, `to_user`, `sender_balance`, `recipient_balance`, `network`, `context`)
                                     VALUES
-                                (:amount, :from, :to, :senderbalance, :recipientbalance, "discord")
+                                (:amount, :from, :to, :senderbalance, :recipientbalance, "discord", :context)
         ');
 
         $query->bindValue(':amount', $amount);
@@ -62,6 +63,7 @@ try {
         $query->bindValue(':to', $to);
         $query->bindValue(':senderbalance', - $amount);
         $query->bindValue(':recipientbalance', + $amount);
+        $query->bindValue(':context', $guild);
 
         $query->execute();
 
