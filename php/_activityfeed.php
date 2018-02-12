@@ -64,9 +64,9 @@ if(!empty($o_postdata) && is_object($o_postdata)){
 
             ) G1
             LEFT JOIN
-                `user` ufrom ON (ufrom.`username` = G1.`user`)
+                `user` ufrom ON (ufrom.`username` = G1.`user` AND ufrom.`network` = G1.`network`)
             LEFT JOIN
-                `user` uto ON (uto.`username` = G1.`to`)
+                `user` uto ON (uto.`username` = G1.`to` AND uto.`network` = G1.`network`)
             LEFT JOIN
                 `message` ON (message.id = G1.message)
             ORDER BY moment DESC
