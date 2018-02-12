@@ -74,7 +74,7 @@ client.on('message', msg => {
         msg.delete().then(function(){
           console.log('1. Deleted msg')
           console.log('2. Send merged msg to channel')
-          channel.send(text + ' (<@' + fromUid + '>: ' + msgContent + ')')
+          channel.send('<@' + fromUid + '> ' + text + ' (' + msgContent + ')')
           console.log('3. Confirm to recipient using PB to [' + toUsername + ']')
           if (toUserObject !== null && text.match(/:tada:/)) {
             toUserObject.send('Big thanks to <@' + fromUid + '>! ' + text + ' - More info on https://www.xrptipbot.com' +

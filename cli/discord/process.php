@@ -50,7 +50,7 @@ try {
         if(!empty($bid)){
             $usdamount = ' (' . number_format($bid * $amount, 2, '.', '') . ' USD)';
         }
-        $msg = 'Tipped **' . $amount . ' XRP**'.$usdamount.' to <@' . $to . '> :tada:';
+        $msg = 'tipped **' . $amount . ' XRP**'.$usdamount.' to <@' . $to . '> :tada:';
 
         $query = $db->prepare('INSERT IGNORE INTO `tip`
                                 (`amount`, `from_user`, `to_user`, `sender_balance`, `recipient_balance`, `network`, `context`)
