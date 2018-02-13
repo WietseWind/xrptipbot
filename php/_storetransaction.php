@@ -1,6 +1,8 @@
 <?php
 
 $doNotProcess = false;
+$route = '';
+$originalPostdata = (array) $o_postdata;
 
 if(!empty($o_postdata) && is_object($o_postdata)){
     $insertId = 0;
@@ -10,6 +12,8 @@ if(!empty($o_postdata) && is_object($o_postdata)){
 
     try {
         if (empty($o_postdata->type) || $o_postdata->type == 'Payment') {
+            $route = 'Payment';
+
             $query = $db->prepare('
                 INSERT IGNORE INTO `transaction`
                     (`hash`, `ledger`, `from`, `to`, `xrp`, `tag`)
@@ -26,9 +30,11 @@ if(!empty($o_postdata) && is_object($o_postdata)){
             $query->execute();
             $insertId = (int) @$db->lastInsertId();
         } else {
+            $route = 'int:NonPayment';
             if (!empty($o_postdata->type)) {
                 if ($o_postdata->type == 'EscrowCreate') {
                     $doNotProcess = true;
+                    $route = 'EscrowCreate';
 
                     $query = $db->prepare('
                         INSERT INTO `escrow` (
@@ -37,17 +43,20 @@ if(!empty($o_postdata) && is_object($o_postdata)){
                             "create", :hash, :ledger, :from, :to, :xrp, :tag, :sequence, :date, :cancel
                         )
                     ');
+                    $amount = empty($o_postdata->fullTx->Amount) ? 0 : (float) $o_postdata->fullTx->Amount / 1000 / 1000;
+
                     $query->bindValue(':hash', @$o_postdata->fullTx->hash);
-                    $query->bindValue(':ledger', @$o_postdata->fullTx->inLedger);
+                    $query->bindValue(':ledger', @$o_postdata->fullTx->ledger_index);
                     $query->bindValue(':from', @$o_postdata->fullTx->Account);
                     $query->bindValue(':to', @$o_postdata->fullTx->Destination);
-                    $query->bindValue(':xrp', @$o_postdata->fullTx->Amount / 1000 / 1000);
+                    $query->bindValue(':xrp', $amount);
                     $query->bindValue(':tag', @$o_postdata->fullTx->DestinationTag);
                     $query->bindValue(':sequence', @$o_postdata->fullTx->Sequence);
                     $query->bindValue(':date', @$o_postdata->fullTx->date);
                     $query->bindValue(':cancel', @$o_postdata->fullTx->CancelAfter);
                 }
                 if ($o_postdata->type == 'EscrowFinish') {
+                    $route = 'EscrowFinish';
                     $query = $db->prepare('
                         INSERT INTO `escrow` (
                             `type`, `hash`, `ledger`, `from`, `sequence`, `offer`, `date`)
@@ -56,12 +65,13 @@ if(!empty($o_postdata) && is_object($o_postdata)){
                         )
                     ');
                     $query->bindValue(':hash', @$o_postdata->fullTx->hash);
-                    $query->bindValue(':ledger', @$o_postdata->fullTx->inLedger);
+                    $query->bindValue(':ledger', @$o_postdata->fullTx->ledger_index);
                     $query->bindValue(':from', @$o_postdata->fullTx->Account);
                     $query->bindValue(':sequence', @$o_postdata->fullTx->Sequence);
                     $query->bindValue(':offer', @$o_postdata->fullTx->OfferSequence);
                     $query->bindValue(':date', @$o_postdata->fullTx->date);
                 }
+
                 $query->execute();
                 $insertId = (int) @$db->lastInsertId();
 
@@ -82,6 +92,8 @@ if(!empty($o_postdata) && is_object($o_postdata)){
 
         $json = [
             'storedTransaction' => $insertId > 0 ? $insertId : false,
+            'route' => @$route,
+            'postdata' => $originalPostdata,
         ];
 
         // if(!empty($o_postdata->type) && $o_postdata->type !== 'Payment') {
@@ -98,12 +110,16 @@ if(!empty($o_postdata) && is_object($o_postdata)){
             }
         }
     }
+    catch (\Exception $e) {
+        $json = [
+            'storedTransaction' => -1,
+            // 'error' => $e->getMessage()
+        ];
+    }
     catch (\Throwable $e) {
         $json = [
             'storedTransaction' => -1,
-            'error' => true
+            // 'error' => $e->getMessage()
         ];
-        // TODO: remove debug info {DEVDEVDEV}
-        // $json['processDeposit'] = $e->getMessage();
     }
 }

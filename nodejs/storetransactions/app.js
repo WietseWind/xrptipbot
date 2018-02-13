@@ -32,7 +32,11 @@ var _storeTransaction = function (tx) {
     var destinationTag = parseInt(tx.DestinationTag||0)
     var transferAmount = (parseFloat(typeof tx.Amount !== 'undefined' ? tx.Amount : 0)/1000/1000)
 
-    console.log(tx.hash + ' [ ' + tx.ledger_index + ' ] => From ' + tx.Account + ' To ' + tx.Destination + ':' + destinationTag + ' = ' + transferAmount)
+    var consolePostFix = ' [NO DESTINATION, NON PAYMENT? ESCROW?]'
+    if (typeof tx.Destination !== 'undefined') {
+      consolePostFix = ' To ' + tx.Destination + ':' + destinationTag + ' = ' + transferAmount
+    }
+    console.log(tx.hash + ' [ ' + tx.ledger_index + ' ] => From ' + tx.Account + consolePostFix)
 
     var transactionJson = JSON.stringify({
       hash: tx.hash,
@@ -42,7 +46,7 @@ var _storeTransaction = function (tx) {
       xrp: transferAmount,
       tag: destinationTag,
       type: tx.TransactionType,
-      fullTx: tx
+      fullTx: JSON.parse(JSON.stringify(tx))
     })
 
     fetch('http://127.0.0.1/index.php/storetransaction', { method: 'POST', body: transactionJson })
