@@ -30,7 +30,7 @@ var _lastClosedLedger = function (ledgerIndex) {
 var _storeTransaction = function (tx) {
   if (tx.ledger_index <= closedLedger) {
     var destinationTag = parseInt(tx.DestinationTag||0)
-    var transferAmount = (parseFloat(tx.Amount)/1000/1000)
+    var transferAmount = (parseFloat(typeof tx.Amount !== 'undefined' ? tx.Amount : 0)/1000/1000)
 
     console.log(tx.hash + ' [ ' + tx.ledger_index + ' ] => From ' + tx.Account + ' To ' + tx.Destination + ':' + destinationTag + ' = ' + transferAmount)
 
@@ -40,7 +40,9 @@ var _storeTransaction = function (tx) {
       from: tx.Account,
       to: tx.Destination,
       xrp: transferAmount,
-      tag: destinationTag
+      tag: destinationTag,
+      type: tx.TransactionType,
+      fullTx: tx
     })
 
     fetch('http://127.0.0.1/index.php/storetransaction', { method: 'POST', body: transactionJson })
@@ -63,7 +65,7 @@ var _bootstrap = function () {
     if (message.type === 'response' && typeof message.id !== 'undefined' && message.id <= wallets.length) {
       if (typeof message.result.transactions !== 'undefined' && message.result.transactions.length > 0) {
         message.result.transactions.filter(function (f) {
-          return f.validated && wallets.indexOf(f.tx.Destination) > -1 && f.tx.TransactionType === 'Payment' && typeof f.tx.Amount === 'string' && f.meta.TransactionResult === 'tesSUCCESS'
+          return f.validated && (f.tx.TransactionType === 'Payment' || f.tx.TransactionType === 'EscrowCreate' || f.tx.TransactionType === 'EscrowFinish') && f.meta.TransactionResult === 'tesSUCCESS'
         }).forEach(function (t) {
           var tx = t.tx
           _storeTransaction(tx)
@@ -78,13 +80,13 @@ var _bootstrap = function () {
       id: k + 1,
       command: "account_tx", account: _w,
       ledger_index_min: -1, ledger_index_max: -1,
-      binary: false, count: false, limit: 1000,
-      forward: true
+      binary: false, count: false, limit: 2000,
+      descending: true
     }))
   })
 
   api.connection.on('transaction', (t) => {
-    if (t.transaction.TransactionType === 'Payment' && t.meta.TransactionResult === 'tesSUCCESS') {
+    if ((t.transaction.TransactionType === 'Payment' || t.transaction.TransactionType === 'EscrowCreate' || t.transaction.TransactionType === 'EscrowFinish') && t.meta.TransactionResult === 'tesSUCCESS') {
       var tx = t.transaction
       tx.ledger_index = t.ledger_index
       _storeTransaction(tx)

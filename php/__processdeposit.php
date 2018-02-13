@@ -15,12 +15,17 @@ if(!empty($o_postdata) && is_object($o_postdata)){
 
             $query = $db->prepare('
                 INSERT IGNORE INTO `deposit`
-                    (`tx`, `from_wallet`, `to_wallet`, `destination_tag`, `user`, `ledger`, `amount`, `balance_pre`, `balance_post`, `network`)
+                    (`tx`, `from_wallet`, `to_wallet`, `destination_tag`, `user`, `ledger`, `amount`, `balance_pre`, `balance_post`, `network`, `type`)
                 VALUES
-                    (:tx, :from_wallet, :to_wallet, :destination_tag, :user, :ledger, :amount, :balance_pre, :balance_post, :network)
+                    (:tx, :from_wallet, :to_wallet, :destination_tag, :user, :ledger, :amount, :balance_pre, :balance_post, :network, :type)
             ');
 
             $newBalance = ((float) $depositTo['balance']) + ((float) $o_postdata->xrp);
+
+            $type = 'tx';
+            if (!empty($o_postdata->type)) {
+                $type = $o_postdata->type;
+            }
 
             $query->bindParam(':tx', $o_postdata->hash);
             $query->bindParam(':from_wallet', $o_postdata->from);
@@ -32,6 +37,7 @@ if(!empty($o_postdata) && is_object($o_postdata)){
             $query->bindParam(':balance_pre', $depositTo['balance']);
             $query->bindParam(':balance_post', $newBalance);
             $query->bindParam(':network', $depositTo['network']);
+            $query->bindParam(':type', $type);
             $query->execute();
             $txInsertId = (int) @$db->lastInsertId();
 

@@ -13,7 +13,8 @@ CREATE TABLE `deposit` (
   `ledger` bigint(20) NOT NULL,
   `balance_pre` decimal(20,6) NOT NULL DEFAULT '0.000000',
   `balance_post` decimal(20,6) NOT NULL DEFAULT '0.000000',
-  `network` enum('reddit','twitter') NOT NULL DEFAULT 'reddit',
+  `network` enum('reddit','twitter','discord') NOT NULL DEFAULT 'reddit',
+  `type` enum('tx','escrow') NOT NULL DEFAULT 'tx',
   PRIMARY KEY (`id`),
   UNIQUE KEY `tx_2` (`tx`),
   KEY `moment` (`moment`),
@@ -28,14 +29,45 @@ CREATE TABLE `deposit` (
   KEY `new_balance` (`balance_post`),
   KEY `fee` (`fee`),
   KEY `real_amount` (`real_amount`),
-  KEY `network` (`network`)
-) ENGINE=InnoDB AUTO_INCREMENT=121 DEFAULT CHARSET=utf8mb4;
+  KEY `network` (`network`),
+  KEY `type` (`type`)
+) ENGINE=InnoDB AUTO_INCREMENT=170 DEFAULT CHARSET=utf8mb4;
+
+-- Create syntax for TABLE 'escrow'
+CREATE TABLE `escrow` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `type` enum('create','finish') NOT NULL DEFAULT 'create',
+  `hash` varchar(128) NOT NULL DEFAULT '',
+  `ledger` bigint(20) NOT NULL,
+  `from` varchar(64) DEFAULT '',
+  `to` varchar(64) DEFAULT NULL,
+  `xrp` decimal(20,6) DEFAULT NULL,
+  `tag` bigint(20) DEFAULT NULL,
+  `moment` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `sequence` bigint(20) NOT NULL,
+  `offer` bigint(20) DEFAULT NULL,
+  `date` bigint(20) DEFAULT NULL,
+  `cancel` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `hash_2` (`hash`,`ledger`,`from`,`sequence`),
+  KEY `type` (`type`),
+  KEY `hash` (`hash`),
+  KEY `ledger` (`ledger`),
+  KEY `from` (`from`),
+  KEY `to` (`to`),
+  KEY `xrp` (`xrp`),
+  KEY `tag` (`tag`),
+  KEY `moment` (`moment`),
+  KEY `sequence` (`sequence`),
+  KEY `date` (`date`),
+  KEY `cancel` (`cancel`)
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4;
 
 -- Create syntax for TABLE 'message'
 CREATE TABLE `message` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `moment` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `network` enum('reddit','twitter') NOT NULL DEFAULT 'reddit',
+  `network` enum('reddit','twitter','discord') NOT NULL DEFAULT 'reddit',
   `ext_id` varchar(64) DEFAULT NULL,
   `parent_id` varchar(64) DEFAULT NULL,
   `parent_author` varchar(64) DEFAULT NULL,
@@ -62,7 +94,7 @@ CREATE TABLE `message` (
   KEY `ext_Id` (`ext_id`),
   KEY `parent_id` (`parent_id`),
   KEY `parent_author` (`parent_author`)
-) ENGINE=InnoDB AUTO_INCREMENT=1654 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=2470 DEFAULT CHARSET=utf8mb4;
 
 -- Create syntax for TABLE 'reddit_comments'
 CREATE TABLE `reddit_comments` (
@@ -86,17 +118,18 @@ CREATE TABLE `tip` (
   `message` int(11) unsigned DEFAULT NULL,
   `sender_balance` decimal(20,6) NOT NULL,
   `recipient_balance` decimal(20,6) DEFAULT NULL,
-  `network` enum('reddit','twitter') NOT NULL DEFAULT 'reddit',
+  `network` enum('reddit','twitter','discord') NOT NULL DEFAULT 'reddit',
+  `context` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `reddit_post` (`message`),
   UNIQUE KEY `message` (`message`),
   KEY `moment` (`moment`),
   KEY `amount` (`amount`),
   KEY `from` (`from_user`),
-  KEY `from_balance` (`sender_balance`),
   KEY `to` (`to_user`),
-  KEY `network` (`network`)
-) ENGINE=InnoDB AUTO_INCREMENT=1139 DEFAULT CHARSET=utf8mb4;
+  KEY `network` (`network`),
+  KEY `context` (`context`)
+) ENGINE=InnoDB AUTO_INCREMENT=2033 DEFAULT CHARSET=utf8mb4;
 
 -- Create syntax for TABLE 'transaction'
 CREATE TABLE `transaction` (
@@ -117,18 +150,19 @@ CREATE TABLE `transaction` (
   KEY `xrp` (`xrp`),
   KEY `tag` (`tag`),
   KEY `moment` (`moment`)
-) ENGINE=InnoDB AUTO_INCREMENT=297430 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=338148 DEFAULT CHARSET=utf8mb4;
 
 -- Create syntax for TABLE 'user'
 CREATE TABLE `user` (
   `username` varchar(50) NOT NULL DEFAULT '',
+  `userid` varchar(200) DEFAULT NULL,
   `last_login` timestamp NULL DEFAULT NULL,
   `tipbot_created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `create_reason` enum('LOGIN','TIPPED') DEFAULT NULL,
   `balance` decimal(20,6) NOT NULL DEFAULT '0.000000',
   `destination_tag` bigint(20) NOT NULL AUTO_INCREMENT,
   `destination_wallet` varchar(64) NOT NULL DEFAULT 'rPEPPER7kfTD9w2To4CQk6UCfuHM9c6GDY',
-  `network` enum('reddit','twitter') NOT NULL DEFAULT 'reddit',
+  `network` enum('reddit','twitter','discord') NOT NULL DEFAULT 'reddit',
   PRIMARY KEY (`username`,`network`),
   KEY `last_login` (`last_login`),
   KEY `tipbot_created` (`tipbot_created`),
@@ -136,40 +170,9 @@ CREATE TABLE `user` (
   KEY `balance` (`balance`),
   KEY `destination_tag` (`destination_tag`),
   KEY `destination_wallet` (`destination_wallet`),
-  KEY `network` (`network`)
-) ENGINE=InnoDB AUTO_INCREMENT=1094 DEFAULT CHARSET=utf8mb4;
-
--- Create syntax for VIEW 'v_rPEPPER'
-CREATE ALGORITHM=UNDEFINED DEFINER=`newuser`@`%` SQL SECURITY DEFINER VIEW `v_rPEPPER`
-AS SELECT
-   `transaction`.`id` AS `id`,
-   `transaction`.`hash` AS `hash`,
-   `transaction`.`ledger` AS `ledger`,
-   `transaction`.`from` AS `from`,
-   `transaction`.`to` AS `to`,
-   `transaction`.`xrp` AS `xrp`,
-   `transaction`.`tag` AS `tag`,
-   `transaction`.`moment` AS `moment`
-FROM `transaction` where (`transaction`.`to` = 'rPEPPER7kfTD9w2To4CQk6UCfuHM9c6GDY') order by `transaction`.`id` desc;
-
--- Create syntax for VIEW 'v_withdraw_error'
-CREATE ALGORITHM=UNDEFINED DEFINER=`newuser`@`%` SQL SECURITY DEFINER VIEW `v_withdraw_error`
-AS SELECT
-   `withdraw`.`id` AS `id`,
-   `withdraw`.`moment` AS `moment`,
-   `withdraw`.`user` AS `user`,
-   `withdraw`.`from_wallet` AS `from_wallet`,
-   `withdraw`.`to_wallet` AS `to_wallet`,
-   `withdraw`.`destination_tag` AS `destination_tag`,
-   `withdraw`.`amount` AS `amount`,
-   `withdraw`.`fee` AS `fee`,
-   `withdraw`.`tx` AS `tx`,
-   `withdraw`.`ledger` AS `ledger`,
-   `withdraw`.`processed` AS `processed`,
-   `withdraw`.`ip` AS `ip`,
-   `withdraw`.`donate` AS `donate`,
-   `withdraw`.`log` AS `log`
-FROM `withdraw` where ((isnull(`withdraw`.`fee`) or (`withdraw`.`fee` < 10)) and (`withdraw`.`processed` is not null)) order by `withdraw`.`id` desc;
+  KEY `network` (`network`),
+  KEY `userid` (`userid`(191))
+) ENGINE=InnoDB AUTO_INCREMENT=1469 DEFAULT CHARSET=utf8mb4;
 
 -- Create syntax for TABLE 'withdraw'
 CREATE TABLE `withdraw` (
@@ -187,7 +190,7 @@ CREATE TABLE `withdraw` (
   `ip` varchar(40) DEFAULT NULL,
   `donate` decimal(20,6) DEFAULT NULL,
   `log` longtext,
-  `network` enum('reddit','twitter') NOT NULL DEFAULT 'reddit',
+  `network` enum('reddit','twitter','discord') NOT NULL DEFAULT 'reddit',
   PRIMARY KEY (`id`),
   UNIQUE KEY `tx_2` (`tx`),
   KEY `moment` (`moment`),
@@ -203,4 +206,4 @@ CREATE TABLE `withdraw` (
   KEY `donate` (`donate`),
   KEY `fee` (`fee`),
   KEY `network` (`network`)
-) ENGINE=InnoDB AUTO_INCREMENT=108 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=142 DEFAULT CHARSET=utf8mb4;
