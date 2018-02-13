@@ -93,7 +93,7 @@ if(!empty($o_postdata) && is_object($o_postdata)){
         $json = [
             'storedTransaction' => $insertId > 0 ? $insertId : false,
             'route' => @$route,
-            'postdata' => $originalPostdata,
+            // 'postdata' => $originalPostdata,
         ];
 
         // if(!empty($o_postdata->type) && $o_postdata->type !== 'Payment') {
