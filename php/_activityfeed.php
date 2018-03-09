@@ -1,6 +1,13 @@
 <?php
 
+$limit = 1000;
+
 if(!empty($o_postdata) && is_object($o_postdata)){
+    if (!empty($_GET["limit"])) {
+        $limit = (int) $_GET["limit"];
+        if ($limit < 100) $limit = 100;
+        if ($limit > 10000) $limit = 10000;
+    }
     try {
         $query = $db->prepare("
             SELECT
@@ -24,7 +31,7 @@ if(!empty($o_postdata) && is_object($o_postdata)){
                     tip.`message`
                 FROM `tip`
                 ORDER BY `id` DESC
-                LIMIT 200)
+                LIMIT $limit)
                 -- WHERE tip.`from_user` != 'pepperew'
 
                 UNION
@@ -41,7 +48,7 @@ if(!empty($o_postdata) && is_object($o_postdata)){
                     null as message
                 FROM `deposit`
                 ORDER BY `id` DESC
-                LIMIT 200)
+                LIMIT $limit)
                 -- WHERE `user` != 'pepperew'
 
                 UNION
@@ -59,7 +66,7 @@ if(!empty($o_postdata) && is_object($o_postdata)){
                 FROM `withdraw`
                 WHERE `amount` != 0
                 ORDER BY `id` DESC
-                LIMIT 200)
+                LIMIT $limit)
                 -- WHERE `user` != 'pepperew'
 
             ) G1
@@ -70,7 +77,7 @@ if(!empty($o_postdata) && is_object($o_postdata)){
             LEFT JOIN
                 `message` ON (message.id = G1.message)
             ORDER BY moment DESC
-            LIMIT 200
+            LIMIT $limit
         ");
         $query->execute();
         $json['feed'] = $query->fetchAll(PDO::FETCH_ASSOC);
