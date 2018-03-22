@@ -56,13 +56,13 @@ if(!empty($o_postdata) && is_object($o_postdata) && !empty($o_postdata->name)){
 
         /* - - - - - - - - - GET HISTORY - - - - - - - - */
 
-        $query = $db->prepare('SELECT `tip`.*, `message`.`context`, `user`.`userid` FROM `tip` LEFT JOIN `user` ON (`user`.`username` = `tip`.`from_user`) LEFT JOIN `message` ON (`message`.`id` = `tip`.`message`) WHERE `tip`.`to_user` = :name AND `tip`.`network` = :network ORDER BY `tip`.`id` DESC LIMIT 20');
+        $query = $db->prepare('SELECT `tip`.*, `message`.`context`, `user`.`userid` FROM `tip` LEFT JOIN `user` ON (`user`.`username` = `tip`.`from_user` AND `user`.`network` = :network) LEFT JOIN `message` ON (`message`.`id` = `tip`.`message`) WHERE `tip`.`to_user` = :name AND `tip`.`network` = :network ORDER BY `tip`.`id` DESC LIMIT 20');
         $query->bindParam(':name', $o_postdata->name);
         $query->bindParam(':network', $o_postdata->type);
         $query->execute();
         $history_received = $query->fetchAll(PDO::FETCH_ASSOC);
 
-        $query = $db->prepare('SELECT `tip`.*, `message`.`context`, `user`.`userid` FROM `tip` LEFT JOIN `user` ON (`user`.`username` = `tip`.`to_user`) LEFT JOIN `message` ON (`message`.`id` = `tip`.`message`) WHERE `tip`.`from_user` = :name AND `tip`.`network` = :network ORDER BY `tip`.`id` DESC LIMIT 20');
+        $query = $db->prepare('SELECT `tip`.*, `message`.`context`, `user`.`userid` FROM `tip` LEFT JOIN `user` ON (`user`.`username` = `tip`.`to_user` AND `user`.`network` = :network) LEFT JOIN `message` ON (`message`.`id` = `tip`.`message`) WHERE `tip`.`from_user` = :name AND `tip`.`network` = :network ORDER BY `tip`.`id` DESC LIMIT 20');
         $query->bindParam(':name', $o_postdata->name);
         $query->bindParam(':network', $o_postdata->type);
         $query->execute();
