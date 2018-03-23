@@ -31,14 +31,14 @@ var _storeTransaction = function (tx, fullTx) {
   if (tx.ledger_index <= closedLedger) {
     var destinationTag = parseInt(tx.DestinationTag||0)
     var transferAmount = (parseFloat(typeof tx.Amount !== 'undefined' ? tx.Amount : 0)/1000/1000)
-
+    if (typeof fullTx === 'undefined') fullTx = tx
     if (typeof fullTx.meta !== 'undefined' && typeof fullTx.meta.delivered_amount !== 'undefined') {
       // Another currency, unsupported @ tipbot
-      transferAmount = 0
+      transferAmount = (parseFloat(fullTx.meta.delivered_amount)/1000/1000)
     }
     if (typeof fullTx.meta !== 'undefined' && typeof fullTx.meta.DeliveredAamount !== 'undefined') {
       // Another currency, unsupported @ tipbot
-      transferAmount = 0
+      transferAmount = (parseFloat(fullTx.meta.DeliveredAamount)/1000/1000)
     }
 
     var consolePostFix = ' [NO DESTINATION, NON PAYMENT? ESCROW?]'
