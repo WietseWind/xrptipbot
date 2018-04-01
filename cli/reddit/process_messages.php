@@ -131,7 +131,11 @@ try {
                     }
                 }
             }else{
-                $msg = "Sorry, I only understand comments (when I am mentioned). For more information check the **[Howto](https://www.xrptipbot.com/howto)** or contact the developer of the XRP Tip Bot, /u/pepperew";
+                if (trim(strtolower($m['message'])) == 'balance' || trim(strtolower($m['subject'])) == 'balance') {
+                    $msg = 'Your XRPTipBot balance is: ' . $m['_from_user_balance'] . ' XRP.';
+                } else {
+                    $msg = "Sorry, I only understand comments (when I am mentioned). For more information check the **[Howto](https://www.xrptipbot.com/howto)** or contact the developer of the XRP Tip Bot, /u/pepperew";
+                }
             }
 
             if($m['parent_author'] == 'xrptipbot' && $m['to_user'] == 'xrptipbot'){
