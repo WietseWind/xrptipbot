@@ -12,7 +12,9 @@ try {
           `from`.`username` as _from_user_name,
           `from`.`balance` as _from_user_balance,
           `to`.`username` as _to_user_name,
-          `to`.`balance` as _to_user_balance
+          `to`.`balance` as _to_user_balance,
+          `from`.`destination_wallet` as _from_user_wallet,
+          `from`.`destination_tag` as _from_user_tag
         FROM  `message`
         LEFT JOIN `user` as `from` ON (`from`.`username` = `message`.`from_user` AND `from`.`network` = `message`.`network`)
         LEFT JOIN `user` as `to` ON (`to`.`username` = `message`.`parent_author` AND `to`.`network` = `message`.`network`)
@@ -133,6 +135,8 @@ try {
             }else{
                 if (trim(strtolower($m['message'])) == 'balance' || trim(strtolower($m['subject'])) == 'balance') {
                     $msg = 'Your XRPTipBot balance is: ' . $m['_from_user_balance'] . ' XRP.';
+                } elseif (trim(strtolower($m['message'])) == 'deposit' || trim(strtolower($m['subject'])) == 'deposit') {
+                    $msg = 'Deposit XRP into your TipBot account by sending XRP to: ' . $m['_from_user_wallet'] . ' - PLEASE DO NOT FORGET TO ENTER THE DESTINATION TAG: ' . $m['_from_user_tag'] . '. You will receive a PM when your deposit is processed. This may take a minute.';
                 } else {
                     $msg = "Sorry, I only understand comments (when I am mentioned). For more information check the **[Howto](https://www.xrptipbot.com/howto)** or contact the developer of the XRP Tip Bot, /u/pepperew";
                 }
