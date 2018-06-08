@@ -24,6 +24,8 @@ if(!empty($o_postdata) && is_object($o_postdata)){
                     tip.`moment`,
                     tip.`from_user` as `user`,
                     tip.`to_user` as `to`,
+                    tip.`from_network` as `user_network`,
+                    tip.`to_network` as `to_network`,
                     tip.`amount`,
                     'tip' as `type`,
                     tip.`network`,
@@ -41,6 +43,8 @@ if(!empty($o_postdata) && is_object($o_postdata)){
                     deposit.`moment`,
                     deposit.`user` as `user`,
                     null as `to`,
+                    null as `user_network`,
+                    null as `to_network`,
                     deposit.`amount`,
                     'deposit' as `type`,
                     deposit.`network`,
@@ -58,6 +62,8 @@ if(!empty($o_postdata) && is_object($o_postdata)){
                     withdraw.`moment`,
                     withdraw.`user` as `user`,
                     null as `to`,
+                    null as `user_network`,
+                    null as `to_network`,
                     withdraw.`amount`,
                     'withdraw' as `type`,
                     withdraw.`network`,
@@ -71,9 +77,9 @@ if(!empty($o_postdata) && is_object($o_postdata)){
 
             ) G1
             LEFT JOIN
-                `user` ufrom ON (ufrom.`username` = G1.`user` AND ufrom.`network` = G1.`network`)
+                `user` ufrom ON ( (ufrom.`username` = G1.`user` AND ufrom.`network` = G1.`network`) OR (ufrom.`username` = G1.`user` AND ufrom.`network` = G1.`user_network`) )
             LEFT JOIN
-                `user` uto ON (uto.`username` = G1.`to` AND uto.`network` = G1.`network`)
+                `user` uto ON ( (uto.`username` = G1.`to` AND uto.`network` = G1.`network`) OR (uto.`username` = G1.`to` AND uto.`network` = G1.`to_network`) )
             LEFT JOIN
                 `message` ON (message.id = G1.message)
             ORDER BY moment DESC
