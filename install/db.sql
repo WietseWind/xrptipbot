@@ -31,7 +31,7 @@ CREATE TABLE `deposit` (
   KEY `real_amount` (`real_amount`),
   KEY `network` (`network`),
   KEY `type` (`type`)
-) ENGINE=InnoDB AUTO_INCREMENT=170 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=428 DEFAULT CHARSET=utf8mb4;
 
 -- Create syntax for TABLE 'escrow'
 CREATE TABLE `escrow` (
@@ -49,7 +49,7 @@ CREATE TABLE `escrow` (
   `date` bigint(20) DEFAULT NULL,
   `cancel` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `hash_2` (`hash`,`ledger`,`from`,`sequence`),
+  UNIQUE KEY `hash_2` (`hash`),
   KEY `type` (`type`),
   KEY `hash` (`hash`),
   KEY `ledger` (`ledger`),
@@ -61,7 +61,7 @@ CREATE TABLE `escrow` (
   KEY `sequence` (`sequence`),
   KEY `date` (`date`),
   KEY `cancel` (`cancel`)
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=42 DEFAULT CHARSET=utf8mb4;
 
 -- Create syntax for TABLE 'message'
 CREATE TABLE `message` (
@@ -94,7 +94,7 @@ CREATE TABLE `message` (
   KEY `ext_Id` (`ext_id`),
   KEY `parent_id` (`parent_id`),
   KEY `parent_author` (`parent_author`)
-) ENGINE=InnoDB AUTO_INCREMENT=2470 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=8675 DEFAULT CHARSET=utf8mb4;
 
 -- Create syntax for TABLE 'reddit_comments'
 CREATE TABLE `reddit_comments` (
@@ -118,8 +118,10 @@ CREATE TABLE `tip` (
   `message` int(11) unsigned DEFAULT NULL,
   `sender_balance` decimal(20,6) NOT NULL,
   `recipient_balance` decimal(20,6) DEFAULT NULL,
-  `network` enum('reddit','twitter','discord') NOT NULL DEFAULT 'reddit',
+  `network` enum('reddit','twitter','discord','btn') NOT NULL DEFAULT 'reddit',
   `context` varchar(100) DEFAULT NULL,
+  `from_network` enum('reddit','twitter','discord') DEFAULT NULL,
+  `to_network` enum('reddit','twitter','discord') DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `reddit_post` (`message`),
   UNIQUE KEY `message` (`message`),
@@ -128,8 +130,10 @@ CREATE TABLE `tip` (
   KEY `from` (`from_user`),
   KEY `to` (`to_user`),
   KEY `network` (`network`),
-  KEY `context` (`context`)
-) ENGINE=InnoDB AUTO_INCREMENT=2033 DEFAULT CHARSET=utf8mb4;
+  KEY `context` (`context`),
+  KEY `from_network` (`from_network`),
+  KEY `to_network` (`to_network`)
+) ENGINE=InnoDB AUTO_INCREMENT=8786 DEFAULT CHARSET=utf8mb4;
 
 -- Create syntax for TABLE 'transaction'
 CREATE TABLE `transaction` (
@@ -150,7 +154,7 @@ CREATE TABLE `transaction` (
   KEY `xrp` (`xrp`),
   KEY `tag` (`tag`),
   KEY `moment` (`moment`)
-) ENGINE=InnoDB AUTO_INCREMENT=338148 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=489741 DEFAULT CHARSET=utf8mb4;
 
 -- Create syntax for TABLE 'user'
 CREATE TABLE `user` (
@@ -172,7 +176,7 @@ CREATE TABLE `user` (
   KEY `destination_wallet` (`destination_wallet`),
   KEY `network` (`network`),
   KEY `userid` (`userid`(191))
-) ENGINE=InnoDB AUTO_INCREMENT=1469 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=3521 DEFAULT CHARSET=utf8mb4;
 
 -- Create syntax for TABLE 'withdraw'
 CREATE TABLE `withdraw` (
@@ -206,4 +210,4 @@ CREATE TABLE `withdraw` (
   KEY `donate` (`donate`),
   KEY `fee` (`fee`),
   KEY `network` (`network`)
-) ENGINE=InnoDB AUTO_INCREMENT=142 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=476 DEFAULT CHARSET=utf8mb4;
