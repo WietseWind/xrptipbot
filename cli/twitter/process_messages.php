@@ -80,7 +80,7 @@ try {
                                                 'Awesome, you received',
                                                 'Woohoo :) Tip time'
                                             ];
-                                            $msg = '@' . $m['parent_author'] . $prefix[array_rand($prefix)] . ': ' . $amount . ' $XRP' . $usdamount . ' from @' . $m['from_user'] . ' ';
+                                            $msg = '@' . $m['parent_author'] . ' ' . $prefix[array_rand($prefix)] . ': ' . $amount . ' $XRP' . $usdamount . ' from @' . $m['from_user'] . ' ';
                                             // if(empty($m['_to_user_name'])){
                                                 // $msg .= "\n".'(This is the first tip sent to @' . $m['parent_author'] . ' :D)';
                                             // }
