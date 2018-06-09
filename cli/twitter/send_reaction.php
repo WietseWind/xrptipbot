@@ -18,7 +18,7 @@ if(!empty($original_text)){
         'status' => $text." 🎉$tipboturl #xrpthestandard",
     ];
     if (!empty($parent_id)) {
-        $postdata['attachment_url'] = 'https://twitter.com/' . $at_id;
+        // $postdata['attachment_url'] = 'https://twitter.com/' . $at_id;
         $postdata['in_reply_to_status_id'] = $parent_id;
     }
     $post = $twitter_call('/statuses/update', 'POST', $postdata);

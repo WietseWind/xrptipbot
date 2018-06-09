@@ -75,7 +75,12 @@ try {
                                             if(!empty($bid)){
                                                 $usdamount = ' (' . number_format($bid * $amount, 2, '.', '') . ' USD)';
                                             }
-                                            $msg = '@' . $m['parent_author'] . ' You have received a tip: ' . $amount . ' $XRP' . $usdamount . ' from @' . $m['from_user'] . ' ';
+                                            $prefix = [ 
+                                                'You have received a tip',
+                                                'Awesome, you received',
+                                                'Woohoo :) Tip time'
+                                            ];
+                                            $msg = '@' . $m['parent_author'] . $prefix[array_rand($prefix)] . ': ' . $amount . ' $XRP' . $usdamount . ' from @' . $m['from_user'] . ' ';
                                             // if(empty($m['_to_user_name'])){
                                                 // $msg .= "\n".'(This is the first tip sent to @' . $m['parent_author'] . ' :D)';
                                             // }

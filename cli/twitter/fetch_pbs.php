@@ -6,6 +6,8 @@ require_once '/data/db.php';
 echo "\nProcessing TWITTER inbox messages...\n";
 
 $mentions = $twitter_call('/statuses/mentions_timeline', 'GET', [ 'count' => 200, 'tweet_mode' => 'extended' ]);
+// print_r($mentions);
+// exit;
 
 if(!empty($mentions)) {
     foreach($mentions as $m) {
