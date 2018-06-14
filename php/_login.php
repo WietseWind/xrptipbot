@@ -37,6 +37,24 @@ if(!empty($o_postdata) && is_object($o_postdata) && !empty($o_postdata->name)){
         $query->execute();
         $row = $query->fetchAll(PDO::FETCH_ASSOC);
 
+        if ($o_postdata->type == 'twitter') {
+            $query = $db->prepare("
+                SELECT 
+                    l.`username` u,
+                    l.`balance` b
+                FROM 
+                    `user` l 
+                WHERE 
+                    l.`username` != :name
+                    AND l.`balance` > 0
+                    AND l.`userid` = (SELECT `userid` FROM `user` WHERE `username` = :name AND l.`network` = 'twitter')
+                    AND l.`network` = 'twitter'
+            ");
+            $query->bindParam(':name', $o_postdata->name);
+            $query->execute();
+            $migrations = $query->fetchAll(PDO::FETCH_ASSOC);
+        }
+
         $tipsSent = 0;
         $tipsReceived = 0;
 
@@ -124,6 +142,7 @@ if(!empty($o_postdata) && is_object($o_postdata) && !empty($o_postdata->name)){
                 'deposits' => $history_deposits,
                 'withdrawals' => $history_withdrawals,
             ],
+            'migrations' => empty($migrations) ? [] : $migrations
         ];
     }
     catch (\Throwable $e) {
