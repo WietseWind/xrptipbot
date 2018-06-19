@@ -59,13 +59,13 @@ if(!empty($o_postdata) && is_object($o_postdata) && !empty($o_postdata->name)){
         $tipsReceived = 0;
 
         if(isset($row[0]) && !empty($row[0]['username'])) {
-            $query = $db->prepare('SELECT count(1) as _count, sum(amount) as _sum FROM tip WHERE `from_user` = :name AND `network` = :network');
+            $query = $db->prepare('SELECT count(1) as _count, sum(amount) as _sum FROM tip WHERE `from_user` = :name AND (`network` = :network OR `from_network` = :network)');
             $query->bindParam(':name', $row[0]['username']);
             $query->bindParam(':network', $row[0]['network']);
             $query->execute();
             $tipsSent = $query->fetch(PDO::FETCH_ASSOC);
 
-            $query = $db->prepare('SELECT count(1) as _count, sum(amount) as _sum FROM tip WHERE `to_user` = :name AND `network` = :network');
+            $query = $db->prepare('SELECT count(1) as _count, sum(amount) as _sum FROM tip WHERE `to_user` = :name AND (`network` = :network OR `to_network` = :network)');
             $query->bindParam(':name', $row[0]['username']);
             $query->bindParam(':network', $row[0]['network']);
             $query->execute();
