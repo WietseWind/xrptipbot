@@ -31,6 +31,7 @@ var _storeTransaction = function (tx, fullTx) {
   if (tx.ledger_index <= closedLedger) {
     var destinationTag = parseInt(tx.DestinationTag||0)
     var transferAmount = (parseFloat(typeof tx.Amount !== 'undefined' ? tx.Amount : 0)/1000/1000)
+    console.dir(fullTx, { depth: null })
     if (typeof fullTx === 'undefined') fullTx = tx
     if (typeof fullTx.meta !== 'undefined' && typeof fullTx.meta.delivered_amount !== 'undefined') {
       // Another currency, unsupported @ tipbot
@@ -102,7 +103,7 @@ var _bootstrap = function () {
     if ((t.transaction.TransactionType === 'Payment' || t.transaction.TransactionType === 'EscrowCreate' || t.transaction.TransactionType === 'EscrowFinish') && t.meta.TransactionResult === 'tesSUCCESS') {
       var tx = t.transaction
       tx.ledger_index = t.ledger_index
-      _storeTransaction(tx)
+      _storeTransaction(tx, t)
     }
   })
 
