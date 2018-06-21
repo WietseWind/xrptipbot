@@ -21,13 +21,38 @@ if(!empty($original_text)){
         $postdata['attachment_url'] = 'https://twitter.com/' . $at_id;
         // $postdata['in_reply_to_status_id'] = $parent_id;
     }
-    $post = $twitter_call('/statuses/update', 'POST', $postdata);
+    // $post = $twitter_call('/statuses/update', 'POST', $postdata);
+    $pr = preg_match("/^@([^ ]+?) (.+)$/", $text, $match);
+    print_r($match);
+    if ($pr) {
+        $user = @$twitter_call('users/lookup', 'GET', [ 'screen_name' => trim($match[1]) ])[0]->id;
+        if (!empty($user)) {
+            $post = $twitter_call('direct_messages/events/new', 'POST', [], [
+                // 'status' => "@$to Your #tipbot deposit of $amount ".'$XRP'." just came through :D Great! Happy tipping. More info: https://www.xrptipbot.com/howto #xrpthestandard",
+                'event' => [
+                    'type' => 'message_create',
+                    'message_create' => [
+                        'target' => [
+                            'recipient_id' => $user
+                        ],
+                        'message_data' => [
+                            'text' => trim($match[2]) . (!empty($postdata['attachment_url']) ? ' (' . $postdata['attachment_url'] . ')' : '') . " 🎉 $tipboturl #xrpthestandard\n\n-- This is an automated message. Replies to this message will not be read or responded to. Questions? Contact @WietseWind."
+                        ]
+                    ]
+                ]
+            ]);
+            print_r($post);
+        }
+    }
 }
 
 $callbackurl = '';
 if(!empty($post->id)){
     $callbackurl = "https://twitter.com/xrptipbot/status/" . @$post->id;
     echo "\n\nPosted, $callbackurl" . ' ^ ' . @$post->text . "\n";
+}elseif(!empty($post->event->id)){
+    // $callbackurl = "https://twitter.com/xrptipbot/status/" . @$post->id;
+    echo "\n\nPosted, ".$post->event->type." (".$post->event->id.")\n";
 }else{
     if(empty($original_text)){
         echo "\n\nSuppressed, no text.\n";
