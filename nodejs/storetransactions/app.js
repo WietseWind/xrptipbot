@@ -36,9 +36,9 @@ var _storeTransaction = function (tx, fullTx) {
       // Another currency, unsupported @ tipbot
       transferAmount = (parseFloat(fullTx.meta.delivered_amount)/1000/1000)
     }
-    if (typeof fullTx.meta !== 'undefined' && typeof fullTx.meta.DeliveredAamount !== 'undefined') {
+    if (typeof fullTx.meta !== 'undefined' && typeof fullTx.meta.DeliveredAmount !== 'undefined') {
       // Another currency, unsupported @ tipbot
-      transferAmount = (parseFloat(fullTx.meta.DeliveredAamount)/1000/1000)
+      transferAmount = (parseFloat(fullTx.meta.DeliveredAmount)/1000/1000)
     }
 
     var consolePostFix = ' [NO DESTINATION, NON PAYMENT? ESCROW?]'
