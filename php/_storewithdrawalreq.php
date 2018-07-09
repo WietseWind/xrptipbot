@@ -11,9 +11,9 @@ if(!empty($o_postdata) && is_object($o_postdata) && !empty($o_postdata->name)){
         if(!empty($row->username) && !empty($row->balance) && $row->balance > 0 && (float) $o_postdata->amount <= (float) $row->balance){
             $query = $db->prepare('
                 INSERT IGNORE INTO `withdraw`
-                    (`user`, `from_wallet`, `to_wallet`, `destination_tag`, `amount`, `ip`, `donate`, `network`)
+                    (`user`, `from_wallet`, `to_wallet`, `destination_tag`, `source_tag`, `amount`, `ip`, `donate`, `network`)
                 VALUES
-                    (:user, :from_wallet, :to_wallet, :destination_tag, :amount, :ip, :donate, :network)
+                    (:user, :from_wallet, :to_wallet, :destination_tag, :source_tag, :amount, :ip, :donate, :network)
             ');
 
             $amount = (float) @$o_postdata->amount;
@@ -35,6 +35,7 @@ if(!empty($o_postdata) && is_object($o_postdata) && !empty($o_postdata->name)){
             $query->bindValue('from_wallet', @$row->destination_wallet);
             $query->bindValue('to_wallet', @$o_postdata->wallet);
             $query->bindValue('destination_tag', @$o_postdata->tag);
+            $query->bindValue('source_tag', @$o_postdata->srctag);
             $query->bindValue('amount', $amount);
             $query->bindValue('ip', @$o_postdata->ip);
             $query->bindValue('donate', @$o_postdata->donate);

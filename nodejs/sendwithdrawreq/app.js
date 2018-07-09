@@ -21,7 +21,7 @@ var startLedger = 0
 
   var argv = process.argv.reverse()[0].split(':')
 
-  if(argv.length !== 4) {
+  if(argv.length !== 5) {
     console.log('Invalid # arguments')
     process.exit(1)
   }
@@ -29,6 +29,7 @@ var startLedger = 0
   var payFrom = argv[1]
   var payTo = argv[2]
   var payTo_tag = parseInt(argv[3])
+  var payFrom_tag = parseInt(argv[4])
   var xrpAmount = parseFloat(argv[0])
 
   console.log('< PAY ' + xrpAmount + ' XRP FROM ' + payFrom + ' TO ' + payTo + ':' + payTo_tag)
@@ -56,7 +57,11 @@ var _processTransaction = function () {
         "Amount" : (xrpAmount*1000*1000).toFixed(0)+"",
         "LastLedgerSequence" : closedLedger+ledgerAwait,
         "Sequence" : accInfo.sequence
-     }
+    }
+
+    if (typeof payFrom_tag !== 'undefined' && !isNaN(payFrom_tag) && payFrom_tag > 0) {
+      transaction.SourceTag = payFrom_tag
+    }
 
     // transaction = {"tx_json" : transaction }
     console.log('===> Transaction: ', transaction)
