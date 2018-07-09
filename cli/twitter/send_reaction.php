@@ -36,7 +36,7 @@ if(!empty($original_text)){
                             'recipient_id' => $user
                         ],
                         'message_data' => [
-                            'text' => trim($match[2]) . (!empty($postdata['attachment_url']) ? ' (' . $postdata['attachment_url'] . ')' : '') . " 🎉 $tipboturl #xrpthestandard\n\n-- This is an automated message. Replies to this message will not be read or responded to. Questions? Contact @WietseWind."
+                            'text' => trim($match[2]) . (!empty($postdata['attachment_url']) ? ' (' . $postdata['attachment_url'] . ')' : '') . " 🎉 $tipboturl #xrpthestandard\n\n-- This is an automated message. Replies to this message will not be read or responded to. Questions? Contact @WietseWind.\n\nA maximum of five DMs will be sent in 24 hours. If you want to receive more Tip notifications, reply something (eg. 'OK') to reset this limit."
                         ]
                     ]
                 ]
