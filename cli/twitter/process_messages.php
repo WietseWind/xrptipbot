@@ -12,7 +12,8 @@ try {
           `from`.`username` as _from_user_name,
           `from`.`balance` as _from_user_balance,
           `to`.`username` as _to_user_name,
-          `to`.`balance` as _to_user_balance
+          `to`.`balance` as _to_user_balance,
+          `to`.`disablenotifications` as _to_disablenotifications
         FROM  `message`
         LEFT JOIN `user` as `from` ON (`from`.`username` = `message`.`from_user` AND `from`.`network` = `message`.`network`)
         LEFT JOIN `user` as `to` ON (`to`.`username` = `message`.`parent_author` AND `to`.`network` = `message`.`network`)
@@ -151,7 +152,11 @@ try {
             $to_post = $m['from_user']. '/status/' . $m['ext_id'];
             $msg_escaped = str_replace("'", "'\"'\"'", $msg);
             $msg_escaped = trim(preg_replace("@[ \t\r\n]+@", " ", $msg_escaped));
-            echo `cd /data/cli/twitter; php send_reaction.php '$to_post' '$msg_escaped'`;
+            if ($m['_to_disablenotifications'] < 1) {
+                echo `cd /data/cli/twitter; php send_reaction.php '$to_post' '$msg_escaped'`;
+            } else {
+                echo "NOTIFICATIONS TO TO_USER DISABLED";
+            }
             sleep(2);
         }
     }
