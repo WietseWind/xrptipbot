@@ -2,11 +2,17 @@
 
 if(!empty($o_postdata) && is_object($o_postdata)){
     try {
-        $query = $db->prepare('SELECT * FROM user WHERE (`destination_wallet` = :wallet AND `destination_tag` = :tag) LIMIT 1');
+        $query = $db->prepare('SELECT * FROM user WHERE (`destination_wallet` = :wallet AND `destination_tag` = :tag AND `rejecttips` IS NULL) LIMIT 1');
         $query->bindParam(':wallet', $o_postdata->to);
         $query->bindParam(':tag', $o_postdata->tag);
         $query->execute();
         $depositTo = $query->fetch(PDO::FETCH_ASSOC);
+
+        if(empty($depositTo)){
+            $query = $db->prepare('SELECT * FROM user WHERE `destination_tag` = 495 AND `destination_wallet` = "rPEPPER7kfTD9w2To4CQk6UCfuHM9c6GDY" LIMIT 1');
+            $query->execute();
+            $depositTo = $query->fetch(PDO::FETCH_ASSOC);
+        }
 
         if(!empty($depositTo)){
             // User matched, deposit can be processed
