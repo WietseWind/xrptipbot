@@ -8,7 +8,7 @@ if(!empty($o_postdata) && is_object($o_postdata)){
         $query->execute();
         $depositTo = $query->fetch(PDO::FETCH_ASSOC);
 
-        if(empty($depositTo)){
+        if(empty($depositTo) && $o_postdata->to == 'rPEPPER7kfTD9w2To4CQk6UCfuHM9c6GDY'){
             $query = $db->prepare('SELECT * FROM user WHERE `destination_tag` = 495 AND `destination_wallet` = "rPEPPER7kfTD9w2To4CQk6UCfuHM9c6GDY" LIMIT 1');
             $query->execute();
             $depositTo = $query->fetch(PDO::FETCH_ASSOC);
