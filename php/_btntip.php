@@ -15,7 +15,9 @@ if(!empty($o_postdata) && is_object($o_postdata)){
             $response['userTo'] = $userTo = preg_replace("@['\"\r\n]*@", "", $o_postdata->to->user);
             $response['amount'] = $amount = (float) $o_postdata->amount;
             if ($amount < 0.01) $amount = 0.01;
-            if ($amount > 5) $amount = 5;
+            if (!isset($o_postdata->noLimit)){
+                if ($amount > 5) $amount = 5;
+            }
 
             $toField = $fromField = 'username';
             // if ($networkFrom == 'discord') $fromField = 'userid';
@@ -28,10 +30,12 @@ if(!empty($o_postdata) && is_object($o_postdata)){
             $query->execute();
             $usrs = $query->fetchAll(PDO::FETCH_ASSOC);
             $response['userLookup'] = $usrs;
+            $disabledUser = false;
             if(!empty($usrs)) {
                 $ufrom = [];
                 $uto = [];
                 foreach ($usrs as $u) {
+                    if (!empty($u['rejecttips'])) $disabledUser = true;
                     if($u['type'] == 'from') {
                         $response['ufrom'] = $ufrom = $u;
                     }else{
@@ -46,6 +50,8 @@ if(!empty($o_postdata) && is_object($o_postdata)){
         
             if (empty($ufrom)) {
                 $msg = "Register your Tip Bot account first, visit https://www.xrptipbot.com/?login=discord and deposit some XRP.";
+            } elseif($disabledUser) {
+                $msg = "User disabled";
             } elseif( (float) $ufrom['balance'] == 0) {
                 $msg = "You don't have any XRP in your Tip Bot account, deposit at https://www.xrptipbot.com/deposit";
             } else {
