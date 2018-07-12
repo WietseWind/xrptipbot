@@ -13,6 +13,7 @@ try {
           `from`.`balance` as _from_user_balance,
           `to`.`username` as _to_user_name,
           `to`.`balance` as _to_user_balance,
+          `to`.`rejecttips` as _to_rejecttips,
           `to`.`disablenotifications` as _to_disablenotifications
         FROM  `message`
         LEFT JOIN `user` as `from` ON (`from`.`username` = `message`.`from_user` AND `from`.`network` = `message`.`network`)
@@ -36,6 +37,9 @@ try {
                 if(empty($m['parent_author'])){
                     // $msg = "Sorry, cannot determine the user you replied to when mentioning me :(";
                     $msg = '';
+                }elseif(!empty($m['_to_rejecttips'])){
+                    // $msg = "Destination user rejected tips";
+                    $msg = "@".$m['from_user']." Sorry, your Tip to @".$m['parent_author']." didn't go through: this user permanently disabled his/her XRPTipBot account.";
                 }else{
                     if(strtolower($m['parent_author']) == strtolower($m['from_user'])){
                         // $msg = "Sorry @".$m['from_user'].", this didn't work. You replied to a tweet posted by yourself.";

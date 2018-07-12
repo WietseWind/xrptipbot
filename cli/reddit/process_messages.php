@@ -14,7 +14,8 @@ try {
           `to`.`username` as _to_user_name,
           `to`.`balance` as _to_user_balance,
           `from`.`destination_wallet` as _from_user_wallet,
-          `from`.`destination_tag` as _from_user_tag
+          `from`.`destination_tag` as _from_user_tag,
+          `to`.`rejecttips` as _to_rejecttips
         FROM  `message`
         LEFT JOIN `user` as `from` ON (`from`.`username` = `message`.`from_user` AND `from`.`network` = `message`.`network`)
         LEFT JOIN `user` as `to` ON (`to`.`username` = `message`.`parent_author` AND `to`.`network` = `message`.`network`)
@@ -61,6 +62,8 @@ try {
                             }else {
                                 if(empty($m['_from_user_name'])){
                                     $msg = "You cannot send tips untill you **[deposit some XRP](https://www.xrptipbot.com/deposit)**...";
+                                }elseif(!empty($m['_to_rejecttips'])){
+                                    $msg = "Sorry /u/".$m['from_user'].", your Tip to /u/".$m['parent_author']." didn't go through: this user permanently disabled his/her XRPTipBot account.";
                                 }else{
 
                                     if(empty($m['_to_user_name'])){

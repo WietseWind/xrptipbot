@@ -15,10 +15,12 @@ try {
     ');
     $query->execute();
     $usrs = $query->fetchAll(PDO::FETCH_ASSOC);
+    $disabledUser = false;
     if(!empty($usrs)) {
         $ufrom = [];
         $uto = [];
         foreach ($usrs as $u) {
+            if (!empty($u['rejecttips'])) $disabledUser = true;
             if($u['type'] == 'from') {
                 $ufrom = $u;
             }else{
@@ -35,6 +37,8 @@ try {
         echo "Register your Tip Bot account first, visit https://www.xrptipbot.com/?login=discord and deposit some XRP.";
     } elseif( (float) $ufrom['balance'] == 0) {
         echo "You don't have any XRP in your Tip Bot account, deposit at https://www.xrptipbot.com/deposit";
+    } elseif($disabledUser) {
+        echo "XRP TipBot user disabled";
     } else{
         if(empty($uto)){
             // Create TO user
