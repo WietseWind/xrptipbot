@@ -28,7 +28,7 @@ if(!empty($original_text)){
         $user = @$twitter_call('users/lookup', 'GET', [ 'screen_name' => trim($match[1]) ])[0]->id;
         if (!empty($user)) {
             $post = $twitter_call('direct_messages/events/new', 'POST', [], [
-                // 'status' => "@$to Your #tipbot deposit of $amount ".'$XRP'." just came through :D Great! Happy tipping. More info: https://www.xrptipbot.com/howto #xrpthestandard",
+                // 'status' => "@$to Your #tipbot deposit of $amount ".'XRP'." just came through :D Great! Happy tipping. More info: https://www.xrptipbot.com/howto #xrpthestandard",
                 'event' => [
                     'type' => 'message_create',
                     'message_create' => [
