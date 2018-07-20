@@ -25,9 +25,15 @@ if(!empty($original_text)){
     $pr = preg_match("/^@([^ ]+?) (.+)$/", $text, $match);
     print_r($match);
     if ($pr) {
-        $user = @$twitter_call('users/lookup', 'GET', [ 'screen_name' => trim($match[1]) ])[0]->id;
+        $user = @$twitter_call('users/lookup', 'GET', [ 'screen_name' => trim($match[1]) ]);
         if (!empty($user)) {
-            $post = $twitter_call('direct_messages/events/new', 'POST', [], [
+            if(is_array($user)){ 
+		$user = @$user[0]->id;
+            } else {
+                $user = @$user->id;
+            }
+	    if (!empty($user)) {
+              $post = $twitter_call('direct_messages/events/new', 'POST', [], [
                 // 'status' => "@$to Your #tipbot deposit of $amount ".'XRP'." just came through :D Great! Happy tipping. More info: https://www.xrptipbot.com/howto #xrpthestandard",
                 'event' => [
                     'type' => 'message_create',
@@ -40,8 +46,9 @@ if(!empty($original_text)){
                         ]
                     ]
                 ]
-            ]);
-            print_r($post);
+              ]);
+              print_r($post);
+           }
         }
     }
 }
@@ -58,7 +65,7 @@ if(!empty($post->id)){
         echo "\n\nSuppressed, no text.\n";
     }else{
         echo "\n\[ERROR]\n";
-        print_r($post);
+        if(!empty($post)) print_r(@$post);
     }
 }
 
@@ -66,6 +73,7 @@ $action = 'reaction';
 if (empty($callbackurl)) {
     $action = 'ignore';
 }
+
 try {
     $query = $db->prepare('UPDATE `message` SET `processed` = 1, processed_moment = CURRENT_TIMESTAMP, action = :action, reaction = :reaction WHERE `ext_id` = :ext_id AND `network` = "twitter" LIMIT 10');
     $query->bindValue(':ext_id', @$parent_id);

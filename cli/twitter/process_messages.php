@@ -21,8 +21,9 @@ try {
         WHERE
             `processed` < 1 AND
             `message`.`network` = "twitter" AND
-            `message`.`from_user` != "xrptipbot"
-        ORDER BY id ASC LIMIT 10
+            `message`.`from_user` != "xrptipbot" AND
+            `message`.`moment` > DATE_SUB(NOW(), INTERVAL 100 DAY)
+        ORDER BY id ASC LIMIT 5
     ');
 
     $query->execute();
@@ -159,7 +160,15 @@ try {
             if ($m['_to_disablenotifications'] < 1) {
                 echo `cd /data/cli/twitter; php send_reaction.php '$to_post' '$msg_escaped'`;
             } else {
-                echo "NOTIFICATIONS TO TO_USER DISABLED";
+                // echo "NOTIFICATIONS TO TO_USER DISABLED";
+		try {
+		    $query = $db->prepare('UPDATE `message` SET `processed` = 1, processed_moment = CURRENT_TIMESTAMP WHERE `ext_id` = :ext_id LIMIT 1');
+		    $query->bindValue(':ext_id', $m['ext_id']);
+		    $query->execute();
+		}
+		catch (\Throwable $e) {
+		    echo "\n ERROR: " . $e->getMessage() . "\n";
+		}
             }
             sleep(2);
         }
