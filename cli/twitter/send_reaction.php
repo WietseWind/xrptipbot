@@ -15,7 +15,7 @@ if(!empty($original_text)){
     }
 
     $postdata = [
-        'status' => $text." 🎉$tipboturl #xrpthestandard",
+        'status' => $text." 🎉$tipboturl",
     ];
     if (!empty($parent_id)) {
         $postdata['attachment_url'] = 'https://twitter.com/' . $at_id;
@@ -34,7 +34,7 @@ if(!empty($original_text)){
             }
 	    if (!empty($user)) {
               $post = $twitter_call('direct_messages/events/new', 'POST', [], [
-                // 'status' => "@$to Your #tipbot deposit of $amount ".'XRP'." just came through :D Great! Happy tipping. More info: https://www.xrptipbot.com/howto #xrpthestandard",
+                // 'status' => "@$to Your #tipbot deposit of $amount ".'XRP'." just came through :D Great! Happy tipping. More info: https://www.xrptipbot.com/howto",
                 'event' => [
                     'type' => 'message_create',
                     'message_create' => [
@@ -42,7 +42,7 @@ if(!empty($original_text)){
                             'recipient_id' => $user
                         ],
                         'message_data' => [
-                            'text' => trim($match[2]) . (!empty($postdata['attachment_url']) ? ' (' . $postdata['attachment_url'] . ')' : '') . " 🎉 $tipboturl #xrpthestandard\n\n-- This is an automated message. Replies to this message will not be read or responded to. Questions? Contact @WietseWind.\n\nA maximum of five DMs will be sent in 24 hours. If you want to receive more Tip notifications, reply something (eg. 'OK') to reset this limit."
+                            'text' => trim($match[2]) . (!empty($postdata['attachment_url']) ? ' ' . $postdata['attachment_url'] . ' ' : '') . " 🎉 $tipboturl\n\n-- This is an automated message. Replies to this message will not be read or responded to. Questions? Contact @WietseWind.\n\nA maximum of five DMs will be sent in 24 hours. If you want to receive more Tip notifications, reply something (eg. 'OK') to reset this limit."
                         ]
                     ]
                 ]

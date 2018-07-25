@@ -16,7 +16,8 @@ if(!empty($mentions)) {
         }
         $m->full_text = trim(preg_replace("@[ \t\r\n]+@", " ", @$m->full_text));
 
-        if (preg_match("@\+[ ]*[0-9,\.]+@", @$m->full_text)) {
+        if (preg_match("@\+[ ]*[0-9,\.]+@", @$m->full_text) && !preg_match("@[a-zA-Z]\+[ ]*[0-9,\.]+@", @$m->full_text) && !preg_match("@\+[ ]*[0-9,\.]+[A-Za-z]@", @$m->full_text)) {
+		// Add ! (2nd and 3rd) to prevent things like "FOCUS+750W Gold" in a reply thread
             echo "\n - [Tweet:";
             echo $m->id;
             echo "] - ";
