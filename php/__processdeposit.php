@@ -2,7 +2,7 @@
 
 if(!empty($o_postdata) && is_object($o_postdata)){
     try {
-        $query = $db->prepare('SELECT * FROM user WHERE (`destination_wallet` = :wallet AND `destination_tag` = :tag AND `rejecttips` IS NULL) LIMIT 1');
+        $query = $db->prepare('SELECT * FROM user WHERE (`destination_wallet` = :wallet AND (`destination_tag` = :tag OR `public_destination_tag` = :tag) AND `rejecttips` IS NULL) LIMIT 1');
         $query->bindParam(':wallet', $o_postdata->to);
         $query->bindParam(':tag', $o_postdata->tag);
         $query->execute();

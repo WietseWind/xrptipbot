@@ -37,6 +37,59 @@ if(!empty($o_postdata) && is_object($o_postdata) && !empty($o_postdata->name)){
         $query->execute();
         $row = $query->fetchAll(PDO::FETCH_ASSOC);
 
+        if(empty($row[0]['public_destination_tag'])){
+            // Fill the random public destination tag, for anonymous public deposits
+            $query = $db->prepare('
+                UPDATE `user`
+                LEFT JOIN (
+                    SELECT n FROM (
+                        SELECT CONCAT(LPAD(CEIL(RAND()*9),1,1), LPAD(FLOOR(RAND()*9999999),6,0)) as n UNION
+                        SELECT CONCAT(LPAD(CEIL(RAND()*9),1,1), LPAD(FLOOR(RAND()*9999999),6,0)) as n UNION
+                        SELECT CONCAT(LPAD(CEIL(RAND()*9),1,1), LPAD(FLOOR(RAND()*9999999),6,0)) as n UNION
+                        SELECT CONCAT(LPAD(CEIL(RAND()*9),1,1), LPAD(FLOOR(RAND()*9999999),6,0)) as n UNION
+                        SELECT CONCAT(LPAD(CEIL(RAND()*9),1,1), LPAD(FLOOR(RAND()*9999999),6,0)) as n UNION
+                        SELECT CONCAT(LPAD(CEIL(RAND()*9),1,1), LPAD(FLOOR(RAND()*9999999),6,0)) as n UNION
+                        SELECT CONCAT(LPAD(CEIL(RAND()*9),1,1), LPAD(FLOOR(RAND()*9999999),6,0)) as n UNION
+                        SELECT CONCAT(LPAD(CEIL(RAND()*9),1,1), LPAD(FLOOR(RAND()*9999999),6,0)) as n UNION
+                        SELECT CONCAT(LPAD(CEIL(RAND()*9),1,1), LPAD(FLOOR(RAND()*9999999),6,0)) as n UNION
+                        SELECT CONCAT(LPAD(CEIL(RAND()*9),1,1), LPAD(FLOOR(RAND()*9999999),6,0)) as n UNION
+                        SELECT CONCAT(LPAD(CEIL(RAND()*9),1,1), LPAD(FLOOR(RAND()*9999999),6,0)) as n UNION
+                        SELECT CONCAT(LPAD(CEIL(RAND()*9),1,1), LPAD(FLOOR(RAND()*9999999),6,0)) as n UNION
+                        SELECT CONCAT(LPAD(CEIL(RAND()*9),1,1), LPAD(FLOOR(RAND()*9999999),6,0)) as n UNION
+                        SELECT CONCAT(LPAD(CEIL(RAND()*9),1,1), LPAD(FLOOR(RAND()*9999999),6,0)) as n UNION
+                        SELECT CONCAT(LPAD(CEIL(RAND()*9),1,1), LPAD(FLOOR(RAND()*9999999),6,0)) as n UNION
+                        SELECT CONCAT(LPAD(CEIL(RAND()*9),1,1), LPAD(FLOOR(RAND()*9999999),6,0)) as n UNION
+                        SELECT CONCAT(LPAD(CEIL(RAND()*9),1,1), LPAD(FLOOR(RAND()*9999999),6,0)) as n UNION
+                        SELECT CONCAT(LPAD(CEIL(RAND()*9),1,1), LPAD(FLOOR(RAND()*9999999),6,0)) as n UNION
+                        SELECT CONCAT(LPAD(CEIL(RAND()*9),1,1), LPAD(FLOOR(RAND()*9999999),6,0)) as n UNION
+                        SELECT CONCAT(LPAD(CEIL(RAND()*9),1,1), LPAD(FLOOR(RAND()*9999999),6,0)) as n
+                    ) R1 
+                    WHERE 
+                        R1.n NOT IN (
+                            SELECT public_destination_tag FROM `user` WHERE public_destination_tag IS NOT NULL
+                        ) 
+                    LIMIT 1
+                ) Rnd ON (Rnd.n > 1000)
+                SET `user`.`public_destination_tag` = Rnd.n
+                WHERE
+                    `user`.`username` = :username
+                    AND
+                    `user`.`network` = :network
+                    AND
+                    `user`.`public_destination_tag` IS NULL
+            ');
+            $query->bindParam(':username', $row[0]['username']);
+            $query->bindParam(':network', $row[0]['network']);
+            $query->execute();
+            if ($query->rowCount() > 0) {
+                $query = $db->prepare('SELECT * FROM user WHERE username = :name AND network = :network');
+                $query->bindParam(':name', $o_postdata->name);
+                $query->bindParam(':network', $o_postdata->type);
+                $query->execute();
+                $row = $query->fetchAll(PDO::FETCH_ASSOC);        
+            }
+        }
+
         if ($o_postdata->type == 'twitter') {
             $query = $db->prepare("
                 SELECT 
@@ -124,6 +177,15 @@ if(!empty($o_postdata) && is_object($o_postdata) && !empty($o_postdata->name)){
         $query->execute();
         $history_withdrawals = $query->fetchAll(PDO::FETCH_ASSOC);
 
+        $donatedDeposits = 0;
+        $query = $db->prepare('SELECT sum(amount) a FROM deposit WHERE `destination_tag` = :tag');
+        $query->bindParam(':tag', $row[0]['public_destination_tag']);
+        $query->execute();
+        $donatedDepositSum = $query->fetchAll(PDO::FETCH_ASSOC);
+        if (!empty($donatedDepositSum)) {
+            $donatedDeposits = (float) $donatedDepositSum[0]['a'];
+        }
+
         /* - - - - - - - END GET HISTORY - - - - - - - - */
 
         $json = [
@@ -134,6 +196,7 @@ if(!empty($o_postdata) && is_object($o_postdata) && !empty($o_postdata->name)){
             'stats'   => [
                 'tipsSent' => $tipsSent,
                 'tipsReceived' => $tipsReceived,
+                'donatedDeposits' => $donatedDeposits,
                 'balance' => @$row[0]['balance']
             ],
             'history'   => [
