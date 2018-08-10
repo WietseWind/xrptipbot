@@ -19,4 +19,5 @@
 /cli/twitter/log/fetch_comments.txt
 /cli/twitter/log/process_messages.txt
 node_modules/
-cli/discord/app.log
+/cli/discord/app.log
+/cli/twitter/pid

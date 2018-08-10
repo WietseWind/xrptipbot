@@ -5,6 +5,13 @@ require_once '/data/db.php';
 
 echo "\nProcessing TWITTER messages...\n";
 
+if((int) @file_get_contents(dirname(__FILE__).'/'.'pid') > 0){
+  echo "Running, exit;";
+  exit;
+}
+
+file_put_contents(dirname(__FILE__).'/'.'pid', 1);
+
 try {
     $query = $db->prepare('
         SELECT
@@ -23,7 +30,7 @@ try {
             `message`.`network` = "twitter" AND
             `message`.`from_user` != "xrptipbot" AND
             `message`.`moment` > DATE_SUB(NOW(), INTERVAL 100 DAY)
-        ORDER BY id ASC LIMIT 5
+        ORDER BY id ASC LIMIT 10
     ');
 
     $query->execute();
@@ -177,5 +184,7 @@ try {
 catch (\Throwable $e) {
     echo "\n ERROR: " . $e->getMessage();
 }
+
+file_put_contents(dirname(__FILE__).'/'.'pid', 0);
 
 echo "\n\n";
