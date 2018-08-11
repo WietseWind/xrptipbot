@@ -15,7 +15,7 @@ try {
         $query->bindValue(':id', $req['id']);
         $query->execute();
 
-        $att = ((float)$req['amount']).':'.$req['from_wallet'].':'.$req['to_wallet'].':'.((int)$req['destination_tag']).':'.((int)$req['source_tag']);
+        $att = ((float)$req['amount']).':'.$req['from_wallet'].':'.$req['to_wallet'].':'.((int)$req['destination_tag']).':'.((int)$req['source_tag']).':'.(@strtoupper(@bin2hex(@utf8_decode($req['memo']))));
         echo "Processing...";
 
         $md = md5($att);

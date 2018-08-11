@@ -1,5 +1,5 @@
 const RippleAPI = require('ripple-lib').RippleAPI
-const api       = new RippleAPI({ server: 'wss://s1.ripple.com' }) // Public rippled server
+const api       = new RippleAPI({ server: 'wss://rippled.xrptipbot.com' }) // Public rippled server
 const fetch     = require('node-fetch')
 const fs        = require('fs')
 const twilio    = require('twilio')
@@ -21,7 +21,7 @@ var startLedger = 0
 
   var argv = process.argv.reverse()[0].split(':')
 
-  if(argv.length !== 5) {
+  if(argv.length !== 6) {
     console.log('Invalid # arguments')
     process.exit(1)
   }
@@ -31,6 +31,7 @@ var startLedger = 0
   var payTo_tag = parseInt(argv[3])
   var payFrom_tag = parseInt(argv[4])
   var xrpAmount = parseFloat(argv[0])
+  var memo = (argv[5] + '').toUpperCase()
 
   console.log('< PAY ' + xrpAmount + ' XRP FROM ' + payFrom + ' TO ' + payTo + ':' + payTo_tag)
 
@@ -49,14 +50,24 @@ var _processTransaction = function () {
     console.log('<< [getAccountInfo] done, info: ', accInfo)
 
     var transaction = {
-        "TransactionType" : "Payment",
-        "Account" : payFrom,
-        "Fee" : _fee+"",
-        "Destination" : payTo,
-        "DestinationTag" : payTo_tag,
-        "Amount" : (xrpAmount*1000*1000).toFixed(0)+"",
-        "LastLedgerSequence" : closedLedger+ledgerAwait,
-        "Sequence" : accInfo.sequence
+      "TransactionType" : "Payment",
+      "Account" : payFrom,
+      "Fee" : _fee+"",
+      "Destination" : payTo,
+      "DestinationTag" : payTo_tag,
+      "Amount" : (xrpAmount*1000*1000).toFixed(0)+"",
+      "LastLedgerSequence" : closedLedger+ledgerAwait,
+      "Sequence" : accInfo.sequence
+    }
+    if (memo !== '') {
+      transaction.Memos = [
+        {
+          Memo: {
+            MemoType: Buffer.from('XrpTipBotNote', 'utf8').toString('hex').toUpperCase(),
+            MemoData: memo
+          }
+        }
+      ]    
     }
 
     if (typeof payFrom_tag !== 'undefined' && !isNaN(payFrom_tag) && payFrom_tag > 0) {
