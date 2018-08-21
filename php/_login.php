@@ -186,6 +186,12 @@ if(!empty($o_postdata) && is_object($o_postdata) && !empty($o_postdata->name)){
             $donatedDeposits = (float) $donatedDepositSum[0]['a'];
         }
 
+        $query = $db->prepare('SELECT id, moment, drops, fee FROM ilp_deposits WHERE user = :name AND network = :network ORDER BY id DESC LIMIT 20');
+        $query->bindParam(':name', $o_postdata->name);
+        $query->bindParam(':network', $o_postdata->type);
+        $query->execute();
+        $history_ilpdeposits = $query->fetchAll(PDO::FETCH_ASSOC);
+
         /* - - - - - - - END GET HISTORY - - - - - - - - */
 
         $json = [
@@ -204,6 +210,7 @@ if(!empty($o_postdata) && is_object($o_postdata) && !empty($o_postdata->name)){
                 'sent' => $history_sent,
                 'deposits' => $history_deposits,
                 'withdrawals' => $history_withdrawals,
+                'ilpdeposits' => $history_ilpdeposits,
             ],
             'migrations' => empty($migrations) ? [] : $migrations
         ];
