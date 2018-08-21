@@ -7,7 +7,7 @@ if(!empty($o_postdata) && is_object($o_postdata) && $_SERVER["HTTP_HOST"] == 'xr
     $exec = null;
 
     try {
-        if (!empty($o_postdata->totalDrops) && !empty($o_postdata->network) && !empty($o_postdata->username) && !empty($o_postdata->connectionTag) && !empty($o_postdata->sourceAccount) && !empty($o_postdata->destinationAccount) && !empty($o_postdata->sharedSecret)) {
+        if (!empty($o_postdata->totalDrops) && $o_postdata->totalDrops > $fee && !empty($o_postdata->network) && !empty($o_postdata->username) && !empty($o_postdata->connectionTag) && !empty($o_postdata->sourceAccount) && !empty($o_postdata->destinationAccount) && !empty($o_postdata->sharedSecret)) {
             $query = $db->prepare('
                 INSERT IGNORE INTO `ilp_deposits`
                     (`connectionTag`, `sharedSecret`, `sourceAccount`, `destinationAccount`, `drops`, `fee`, `network`, `user`)
@@ -33,6 +33,20 @@ if(!empty($o_postdata) && is_object($o_postdata) && $_SERVER["HTTP_HOST"] == 'xr
                 $query->bindParam(':network', $o_postdata->network);
                 $query->execute();
                 $user = (object) $query->fetch(PDO::FETCH_ASSOC);
+
+                if (empty($user->destination_tag)) {
+                    // User doesn't exist, let's create user
+                    $query = $db->prepare('
+                        INSERT IGNORE INTO `user`
+                            (`username`, `create_reason`, `network`)
+                        VALUES
+                            (:username, "ILPDEPOSIT", :network)
+                    ');
+                    $query->bindParam(':network', $o_postdata->network);
+                    $query->bindParam(':username', $o_postdata->username);
+                    $query->execute();
+                    $user->destination_tag = @$db->lastInsertId();    
+                }
 
                 if (!empty($user->destination_tag)) {
                     $tag = $user->destination_tag;

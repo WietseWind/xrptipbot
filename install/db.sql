@@ -86,7 +86,7 @@ CREATE TABLE `ilp_deposits` (
   KEY `network` (`network`),
   KEY `user` (`user`),
   KEY `fee` (`fee`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
 -- Create syntax for TABLE 'message'
 CREATE TABLE `message` (
@@ -119,7 +119,7 @@ CREATE TABLE `message` (
   KEY `ext_Id` (`ext_id`),
   KEY `parent_id` (`parent_id`),
   KEY `parent_author` (`parent_author`)
-) ENGINE=InnoDB AUTO_INCREMENT=35186 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=35191 DEFAULT CHARSET=utf8mb4;
 
 -- Create syntax for TABLE 'reddit_comments'
 CREATE TABLE `reddit_comments` (
@@ -158,7 +158,7 @@ CREATE TABLE `tip` (
   KEY `context` (`context`),
   KEY `from_network` (`from_network`),
   KEY `to_network` (`to_network`)
-) ENGINE=InnoDB AUTO_INCREMENT=38050 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=38056 DEFAULT CHARSET=utf8mb4;
 
 -- Create syntax for TABLE 'transaction'
 CREATE TABLE `transaction` (
@@ -179,7 +179,7 @@ CREATE TABLE `transaction` (
   KEY `xrp` (`xrp`),
   KEY `tag` (`tag`),
   KEY `moment` (`moment`)
-) ENGINE=InnoDB AUTO_INCREMENT=547612 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=547619 DEFAULT CHARSET=utf8mb4;
 
 -- Create syntax for TABLE 'user'
 CREATE TABLE `user` (
@@ -187,7 +187,7 @@ CREATE TABLE `user` (
   `userid` varchar(200) DEFAULT NULL,
   `last_login` timestamp NULL DEFAULT NULL,
   `tipbot_created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `create_reason` enum('LOGIN','TIPPED') DEFAULT NULL,
+  `create_reason` enum('LOGIN','TIPPED','ILPDEPOSIT') DEFAULT NULL,
   `balance` decimal(20,6) NOT NULL DEFAULT '0.000000',
   `destination_tag` bigint(20) NOT NULL AUTO_INCREMENT,
   `destination_wallet` varchar(64) NOT NULL DEFAULT 'rPEPPER7kfTD9w2To4CQk6UCfuHM9c6GDY',
@@ -206,7 +206,7 @@ CREATE TABLE `user` (
   KEY `network` (`network`),
   KEY `userid` (`userid`(191)),
   KEY `public_destination_tag` (`public_destination_tag`)
-) ENGINE=InnoDB AUTO_INCREMENT=8148 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=8149 DEFAULT CHARSET=utf8mb4;
 
 -- Create syntax for TABLE 'withdraw'
 CREATE TABLE `withdraw` (
