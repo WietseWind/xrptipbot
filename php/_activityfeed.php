@@ -18,6 +18,23 @@ if(!empty($o_postdata) && is_object($o_postdata)){
                 IF(G1.context IS NULL, message.context, G1.context) as context
             FROM
             (
+                (SELECT
+                    ilp_deposits.`id`,
+                    ilp_deposits.`moment`,
+                    ilp_deposits.`user` as `user`,
+                    null as `to`,
+                    null as `user_network`,
+                    null as `to_network`,
+                    (ilp_deposits.`drops` - ilp_deposits.`fee`) / 1000000 as amount,
+                    'ILP deposit' as `type`,
+                    ilp_deposits.`network`,
+                    '' as context,
+                    null as message
+                FROM `ilp_deposits`
+                ORDER BY `id` DESC
+                LIMIT $limit)
+
+                UNION
 
                 (SELECT
                     tip.`id`,
