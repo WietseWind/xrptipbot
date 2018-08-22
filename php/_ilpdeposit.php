@@ -3,6 +3,7 @@
 if(!empty($o_postdata) && is_object($o_postdata) && $_SERVER["HTTP_HOST"] == 'xrptipbot.internal:10060'){
     $fee = 12;
     $insertId = 0;
+    $channel = '';
     $user = null;
     $exec = null;
 
@@ -70,6 +71,8 @@ if(!empty($o_postdata) && is_object($o_postdata) && $_SERVER["HTTP_HOST"] == 'xr
                         $query->bindParam(':tag', $tag);
                         $query->bindParam(':amount', $amount);      
                         $exec = $query->execute();
+
+                        $channel = substr(md5($user->username.$user->destination_tag.$user->network),0,20);
                     }
                 }
             }
@@ -77,6 +80,7 @@ if(!empty($o_postdata) && is_object($o_postdata) && $_SERVER["HTTP_HOST"] == 'xr
 
         $json = [
             'storedTransaction' => $insertId > 0 ? $insertId : -1,
+            'channel' => $channel
             // 'error' => false, 'user' => $user, 'exec' => $exec,
             // 'postdata' => $o_postdata, 'server' => $_SERVER
         ];
