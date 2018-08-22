@@ -73,6 +73,20 @@ if(!empty($o_postdata) && is_object($o_postdata) && $_SERVER["HTTP_HOST"] == 'xr
                         $exec = $query->execute();
 
                         $channel = substr(md5($user->username.$user->destination_tag.$user->network),0,20);
+                        /**
+                         * SEND ABLY NOTIFICATION
+                         **/
+                        $postdata = [ 'name' => 'deposit', 'data' => json_encode([
+                            'txInsertId' => $insertId,
+                            'amount' => preg_replace("@\.$@", "", preg_replace("@[0]+$@", "", number_format($amount + ($fee / 1000000), 6, '.', ''))),
+                            'user' => $user->username,
+                            'transaction' => $o_postdata,
+                            'drops' => $o_postdata->totalDrops,
+                            'feeDrops' => $fee
+                        ])];
+
+                        $context = stream_context_create([ 'http' => [ 'method' => 'POST', 'header' => 'Content-type: application/x-www-form-urlencoded', 'content' => http_build_query($postdata) ] ]);
+                        $result = @file_get_contents('https://'.$__ABLY_CREDENTIAL.'@rest.ably.io/channels/'.$channel.'/messages', false, $context);
                     }
                 }
             }
