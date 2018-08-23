@@ -18,10 +18,12 @@ if(!empty($mentions)) {
 
         $isMultiTip = false;
         if (preg_match_all("/(@[a-zA-Z0-9\._-]+[ ]*\+[ ]*[0-9\.,]+[ ]*@xrptipbot)/mis", @$m->full_text, $multiTipMatch)) {
-            $isMultiTip = true;
-            echo "\n\nMULTITIP\n\n";
-            print_r($multiTipMatch[0]);
-            echo "\n\n";
+            if (count($multiTipMatch[0]) > 1) {
+                $isMultiTip = true;
+                echo "\n\nMULTITIP\n\n";
+                print_r($multiTipMatch[0]);
+                echo "\n\n";
+            }
         }
 
         $isThreadWithTipBotMentionedButNotByUser = false;
@@ -34,7 +36,7 @@ if(!empty($mentions)) {
                 // First mention isn't the TipBot
                 preg_match("/^(@[a-zA-Z0-9\._-]+ ){1,}/i", @$m->full_text, $all_prefixed_users);
                 if ($all_prefixed_users) {
-                    if (strlen($all_prefixed_users[0]) < strlen(@$m->full_text)) {
+                    if (strlen($all_prefixed_users[0]) < strlen(@$m->full_text) && preg_match("@[ ]+@", trim($all_prefixed_users[0]))) { // Multiple users
                         echo "\n\n{isThreadWithTipBotMentionedButNotByUser}:\n".$m->full_text."\n ==>";
                         $m->full_text = substr(@$m->full_text, strlen($all_prefixed_users[0]));
                         echo $m->full_text."\n\n";
