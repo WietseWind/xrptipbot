@@ -1,7 +1,7 @@
 <?php
 
 if(!empty($o_postdata) && is_object($o_postdata) && $_SERVER["HTTP_HOST"] == 'xrptipbot.internal:10060'){
-    $fee = 12;
+    $fee = 0;
     $insertId = 0;
     $channel = '';
     $user = null;
