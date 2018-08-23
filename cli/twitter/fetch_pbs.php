@@ -16,7 +16,29 @@ if(!empty($mentions)) {
         }
         $m->full_text = trim(preg_replace("@[ \t\r\n]+@", " ", @$m->full_text));
 
-        if (preg_match("@\+[ ]*[0-9,\.]+@", @$m->full_text) && !preg_match("@[a-zA-Z]\+[ ]*[0-9,\.]+@", @$m->full_text) && !preg_match("@\+[ ]*[0-9,\.]+[A-Za-z]@", @$m->full_text)) {
+        $isThreadWithTipBotMentionedButNotByUser = false;
+        // Check for '@SheilaN48661736 @xrptipbot @XRPTrump @WietseWind @BankXRP @RobertLe88 @haydentiff haha yolo +0.001 @xrptipbot'
+        // vs        '@SheilaN48661736 @xrptipbot @XRPTrump @WietseWind @BankXRP @RobertLe88 @haydentiff haha yolo +0.001'
+        // Eg: if the Tipbot is mentioned not by thread but by user (if thread)
+        if (preg_match("@^\@[a-zA-Z0-9_]+@", @$m->full_text)) {
+            // Starts with mention, possible thread
+            if (!preg_match("@^\@xrptipbot@i", @$m->full_text)) {
+                // First mention isn't the TipBot
+                preg_match("/^(@[a-zA-Z0-9\._-]+ ){1,}/i", @$m->full_text, $all_prefixed_users);
+                if ($all_prefixed_users) {
+                    if (strlen($all_prefixed_users[0]) < strlen(@$m->full_text)) {
+                        echo "\n\n{isThreadWithTipBotMentionedButNotByUser}:\n".$m->full_text."\n ==>";
+                        $m->full_text = substr(@$m->full_text, strlen($all_prefixed_users[0]));
+                        echo $m->full_text."\n\n";
+                        if (!preg_match("@\@xrptipbot@i", $m->full_text)) {
+                            $isThreadWithTipBotMentionedButNotByUser = true;
+                        }
+                    }
+                }                
+            }
+        }
+
+        if (!$isThreadWithTipBotMentionedButNotByUser && preg_match("@\+[ ]*[0-9,\.]+@", @$m->full_text) && !preg_match("@[a-zA-Z]\+[ ]*[0-9,\.]+@", @$m->full_text) && !preg_match("@\+[ ]*[0-9,\.]+[A-Za-z]@", @$m->full_text)) {
 		// Add ! (2nd and 3rd) to prevent things like "FOCUS+750W Gold" in a reply thread
             echo "\n - [Tweet:";
             echo $m->id;
