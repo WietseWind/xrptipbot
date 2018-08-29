@@ -3,10 +3,19 @@
 $limit = 1000;
 
 if(!empty($o_postdata) && is_object($o_postdata)){
+    $skip = 0;
+    if (!empty($_GET["skip"])) {
+        $skip = (int) $_GET["skip"];
+    }
     if (!empty($_GET["limit"])) {
         $limit = (int) $_GET["limit"];
-        if ($limit < 100) $limit = 100;
+        if ($limit < 10) $limit = 10;
         if ($limit > 10000) $limit = 10000;
+    }
+    
+    $subqLimit = '';
+    if ($skip == 0) {
+        $subqLimit = ' LIMIT ' . $limit;
     }
     try {
         $query = $db->prepare("
@@ -31,8 +40,7 @@ if(!empty($o_postdata) && is_object($o_postdata)){
                     '' as context,
                     null as message
                 FROM `ilp_deposits`
-                ORDER BY `id` DESC
-                LIMIT $limit)
+                ORDER BY `id` DESC $subqLimit)
 
                 UNION
 
@@ -49,9 +57,7 @@ if(!empty($o_postdata) && is_object($o_postdata)){
                     tip.`context`,
                     tip.`message`
                 FROM `tip`
-                ORDER BY `id` DESC
-                LIMIT $limit)
-                -- WHERE tip.`from_user` != 'pepperew'
+                ORDER BY `id` DESC $subqLimit)
 
                 UNION
 
@@ -68,9 +74,7 @@ if(!empty($o_postdata) && is_object($o_postdata)){
                     '' as context,
                     null as message
                 FROM `deposit`
-                ORDER BY `id` DESC
-                LIMIT $limit)
-                -- WHERE `user` != 'pepperew'
+                ORDER BY `id` DESC $subqLimit)
 
                 UNION
 
@@ -88,9 +92,7 @@ if(!empty($o_postdata) && is_object($o_postdata)){
                     null as message
                 FROM `withdraw`
                 WHERE `amount` != 0
-                ORDER BY `id` DESC
-                LIMIT $limit)
-                -- WHERE `user` != 'pepperew'
+                ORDER BY `id` DESC $subqLimit)
 
             ) G1
             LEFT JOIN
@@ -100,7 +102,7 @@ if(!empty($o_postdata) && is_object($o_postdata)){
             LEFT JOIN
                 `message` ON (message.id = G1.message)
             ORDER BY moment DESC
-            LIMIT $limit
+            LIMIT $skip, $limit
         ");
         $query->execute();
         $json['feed'] = $query->fetchAll(PDO::FETCH_ASSOC);
