@@ -28,18 +28,22 @@ if(!empty($o_postdata) && is_object($o_postdata)){
             FROM
             (
                 (SELECT
-                    ilp_deposits.`id`,
-                    ilp_deposits.`moment`,
+                    MAX(ilp_deposits.`id`) as id,
+                    MAX(ilp_deposits.`moment`) as moment,
                     ilp_deposits.`user` as `user`,
                     null as `to`,
                     null as `user_network`,
                     null as `to_network`,
-                    (ilp_deposits.`drops` - ilp_deposits.`fee`) / 1000000 as amount,
+                    (SUM(ilp_deposits.`drops`) - SUM(ilp_deposits.`fee`)) / 1000000 as amount,
                     'ILP deposit' as `type`,
                     ilp_deposits.`network`,
                     '' as context,
                     null as message
                 FROM `ilp_deposits`
+                LEFT JOIN `ilp_deposits` next_ilp_deposit ON (
+                    next_ilp_deposit.id = `ilp_deposits`.`id` - 1
+                )
+                GROUP BY CONCAT(ilp_deposits.user, next_ilp_deposit.user)
                 ORDER BY `id` DESC $subqLimit)
 
                 UNION
