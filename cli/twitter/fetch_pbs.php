@@ -26,6 +26,7 @@ if(!empty($mentions)) {
             }
         }
 
+        $replyTruncated = false;
         $isThreadWithTipBotMentionedButNotByUser = false;
         // Check for '@SheilaN48661736 @xrptipbot @XRPTrump @WietseWind @BankXRP @RobertLe88 @haydentiff haha yolo +0.001 @xrptipbot'
         // vs        '@SheilaN48661736 @xrptipbot @XRPTrump @WietseWind @BankXRP @RobertLe88 @haydentiff haha yolo +0.001'
@@ -38,6 +39,7 @@ if(!empty($mentions)) {
                 if ($all_prefixed_users) {
                     if (strlen($all_prefixed_users[0]) < strlen(@$m->full_text) && preg_match("@[ ]+@", trim($all_prefixed_users[0]))) { // Multiple users
                         echo "\n\n{isThreadWithTipBotMentionedButNotByUser}:\n".$m->full_text."\n ==>";
+                        $replyTruncated = true;
                         $m->full_text = substr(@$m->full_text, strlen($all_prefixed_users[0]));
                         echo $m->full_text."\n\n";
                         if (!preg_match("@\@xrptipbot@i", $m->full_text)) {
@@ -45,6 +47,18 @@ if(!empty($mentions)) {
                         }
                     }
                 }                
+            }
+        }
+
+        if (!$isMultiTip && $replyTruncated && !$isThreadWithTipBotMentionedButNotByUser) {
+            // Check if specific typ syntax && reply but specific tip syntax should be used
+            if ($multiTipMatch && is_array($multiTipMatch) && count($multiTipMatch[0]) == 1) {
+                // One time specific syntax, not multitip, 
+                if (preg_match("/^[a-zA-Z0-9\r\n\t\. ]+[^@]+((@[a-zA-Z0-9\._-]+)[ ]*\+[ ]*[0-9\.,]+[ ]*@xrptipbot)/mis", @$m->full_text, $fakeParent)) {
+                   echo "\nREPLY, BUT SPECIFIC TIP SYNTAX: \n   [ " . $multiTipMatch[0][0] . ' ]';
+                   echo "\n       Fake parent user: " . $fakeParent[2] . "\n";
+                   $m->in_reply_to_screen_name = $fakeParent[2];
+                }  
             }
         }
 
