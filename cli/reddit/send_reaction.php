@@ -8,11 +8,14 @@ $text = @$argv[2];
 $original_text = $text;
 
 if(!empty($original_text)){
-    $post = $reddit_call('/api/comment', 'POST', [
+$data = [
         'api_type' => 'json',
         'thing_id' => $at_id,
-        'text' => $text."\n\n---\n**XRPTipBot** 🎉 **[HOWTO](https://www.xrptipbot.com/howto)** | [ACCOUNT](https://www.xrptipbot.com/account) | [DEPOSIT](https://www.xrptipbot.com/deposit) | [WITHDRAW](https://www.xrptipbot.com/withdraw) | [STATS](https://www.xrptipbot.com/stats)",
-    ]);
+        'text' => $text."\n\n---\n**XRPTipBot**, [Learn more](https://www.xrptipbot.com/howto)",
+    ];
+    print_r($data);
+    $post = $reddit_call('/api/comment', 'POST', $data);
+    print_r($post);
 }
 
 if(empty($original_text) || !empty($post->json->data->things[0]->data->name) || (!empty($post->json->errors[0][0]) && preg_match("@delete@i", $post->json->errors[0][0]))){
