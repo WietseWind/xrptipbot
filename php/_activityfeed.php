@@ -40,11 +40,8 @@ if(!empty($o_postdata) && is_object($o_postdata)){
                     '' as context,
                     null as message
                 FROM `ilp_deposits`
-                LEFT JOIN `ilp_deposits` next_ilp_deposit ON (
-                    next_ilp_deposit.id = `ilp_deposits`.`id` - 1
-                )
-                GROUP BY CONCAT(ilp_deposits.user, next_ilp_deposit.user)
-                ORDER BY `id` DESC $subqLimit)
+                GROUP BY CONCAT(ilp_deposits.user, DATE_FORMAT(`moment`, '%Y%m%d%H'))
+                ORDER BY `moment` DESC, `amount` DESC $subqLimit)
 
                 UNION
 
