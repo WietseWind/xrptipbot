@@ -54,10 +54,11 @@ if(!empty($mentions)) {
             // Check if specific typ syntax && reply but specific tip syntax should be used
             if ($multiTipMatch && is_array($multiTipMatch) && count($multiTipMatch[0]) == 1) {
                 // One time specific syntax, not multitip, 
-                if (preg_match("/^[a-zA-Z0-9\r\n\t\. ]+[^@]+((@[a-zA-Z0-9\._-]+)[ ]*\+[ ]*[0-9\.,]+[ ]*@xrptipbot)/mis", @$m->full_text, $fakeParent)) {
+                if (preg_match("/[^@]+((@[a-zA-Z0-9\._-]+)[ ]*\+[ ]*[0-9\.,]+[ ]*@xrptipbot)/mis", @$m->full_text, $fakeParent)) {
                    echo "\nREPLY, BUT SPECIFIC TIP SYNTAX: \n   [ " . $multiTipMatch[0][0] . ' ]';
-                   echo "\n       Fake parent user: " . $fakeParent[2] . "\n";
-                   $m->in_reply_to_screen_name = $fakeParent[2];
+                   $parentUser = preg_replace("/^@/", "", $fakeParent[2]);
+                   echo "\n       Fake parent user: " . $parentUser . "\n";
+                   $m->in_reply_to_screen_name = $parentUser;
                 }  
             }
         }
