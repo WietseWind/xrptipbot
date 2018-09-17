@@ -190,6 +190,16 @@ if(!empty($o_postdata) && is_object($o_postdata) && !empty($o_postdata->name)){
             $donatedDeposits = (float) $donatedDepositSum[0]['a'];
         }
 
+        $ilpDeposited = 0;
+        $query = $db->prepare('SELECT sum(drops) a FROM ilp_deposits WHERE `user_destination_tag` = :tag');
+        $query->bindParam(':tag', $row[0]['destination_tag']);
+        $query->execute();
+        $ilpDonatedDepositSum = $query->fetchAll(PDO::FETCH_ASSOC);
+        if (!empty($ilpDonatedDepositSum)) {
+            $ilpDeposited = (float) $ilpDonatedDepositSum[0]['a'];
+            $ilpDeposited = $ilpDeposited / 1000000;
+        }
+
         $query = $db->prepare('SELECT id, moment, drops, fee FROM ilp_deposits WHERE user = :name AND network = :network ORDER BY id DESC LIMIT 20');
         $query->bindParam(':name', $o_postdata->name);
         $query->bindParam(':network', $o_postdata->type);
@@ -207,6 +217,7 @@ if(!empty($o_postdata) && is_object($o_postdata) && !empty($o_postdata->name)){
                 'tipsSent' => $tipsSent,
                 'tipsReceived' => $tipsReceived,
                 'donatedDeposits' => $donatedDeposits,
+                'ilpDeposited' => $ilpDeposited,
                 'balance' => @$row[0]['balance']
             ],
             'history'   => [
