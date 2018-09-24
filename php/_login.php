@@ -1,6 +1,11 @@
 <?php
 
 if(!empty($o_postdata) && is_object($o_postdata) && !empty($o_postdata->name)){
+    $limit = ' LIMIT 20';
+
+    if (!empty($o_postdata->limit)) {
+        $limit = ' LIMIT ' . (int) $o_postdata->limit;
+    }
     try {
         if (empty($o_postdata->stats)) {
             $query = $db->prepare('
@@ -144,7 +149,8 @@ if(!empty($o_postdata) && is_object($o_postdata) && !empty($o_postdata->name)){
                 OR
                 `tip`.`to_network` = :network
             )
-            ORDER BY `tip`.`id` DESC LIMIT 20');
+            GROUP BY `tip`.`id`
+            ORDER BY `tip`.`id` DESC '.$limit);
         $query->bindParam(':name', $o_postdata->name);
         $query->bindParam(':network', $o_postdata->type);
         $query->execute();
@@ -163,19 +169,20 @@ if(!empty($o_postdata) && is_object($o_postdata) && !empty($o_postdata->name)){
                 OR
                 `tip`.`from_network` = :network
             )
-            ORDER BY `tip`.`id` DESC LIMIT 20');
+            GROUP BY `tip`.`id`
+            ORDER BY `tip`.`id` DESC '.$limit);
         $query->bindParam(':name', $o_postdata->name);
         $query->bindParam(':network', $o_postdata->type);
         $query->execute();
         $history_sent = $query->fetchAll(PDO::FETCH_ASSOC);
 
-        $query = $db->prepare('SELECT * FROM deposit WHERE user = :name AND network = :network ORDER BY id DESC LIMIT 20');
+        $query = $db->prepare('SELECT * FROM deposit WHERE user = :name AND network = :network ORDER BY id DESC '.$limit);
         $query->bindParam(':name', $o_postdata->name);
         $query->bindParam(':network', $o_postdata->type);
         $query->execute();
         $history_deposits = $query->fetchAll(PDO::FETCH_ASSOC);
 
-        $query = $db->prepare('SELECT * FROM withdraw WHERE user = :name AND network = :network ORDER BY id DESC LIMIT 20');
+        $query = $db->prepare('SELECT * FROM withdraw WHERE user = :name AND network = :network ORDER BY id DESC '.$limit);
         $query->bindParam(':name', $o_postdata->name);
         $query->bindParam(':network', $o_postdata->type);
         $query->execute();
@@ -200,7 +207,7 @@ if(!empty($o_postdata) && is_object($o_postdata) && !empty($o_postdata->name)){
             $ilpDeposited = $ilpDeposited / 1000000;
         }
 
-        $query = $db->prepare('SELECT id, moment, drops, fee FROM ilp_deposits WHERE user = :name AND network = :network ORDER BY id DESC LIMIT 20');
+        $query = $db->prepare('SELECT id, moment, drops, fee FROM ilp_deposits WHERE user = :name AND network = :network ORDER BY id DESC '.$limit);
         $query->bindParam(':name', $o_postdata->name);
         $query->bindParam(':network', $o_postdata->type);
         $query->execute();
