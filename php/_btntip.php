@@ -14,9 +14,14 @@ if(!empty($o_postdata) && is_object($o_postdata)){
             $response['userFrom'] = $userFrom = preg_replace("@['\"\r\n]*@", "", $o_postdata->from->user);
             $response['userTo'] = $userTo = preg_replace("@['\"\r\n]*@", "", $o_postdata->to->user);
             $response['amount'] = $amount = (float) $o_postdata->amount;
+            
             if ($amount < 0.01) $amount = 0.01;
-            if (!isset($o_postdata->noLimit)){
-                if ($amount > 5) $amount = 5;
+            if(!empty($o_postdata->app)){
+                if ($amount > 20) $amount = 20;
+            } else{
+                if (!isset($o_postdata->noLimit)){
+                    if ($amount > 5) $amount = 5;
+                }
             }
 
             $toField = $fromField = 'username';
@@ -70,10 +75,16 @@ if(!empty($o_postdata) && is_object($o_postdata)){
                 $query = $db->prepare('INSERT IGNORE INTO `tip`
                                         (`amount`, `from_user`, `to_user`, `sender_balance`, `recipient_balance`, `network`, `context`, `from_network`, `to_network`)
                                             VALUES
-                                        (:amount, :from, :to, :senderbalance, :recipientbalance, "btn", :context, :fromnetwork, :tonetwork)
+                                        (:amount, :from, :to, :senderbalance, :recipientbalance, :method, :context, :fromnetwork, :tonetwork)
                 ');
         
                 $context = @$o_postdata->url . " ### " . $userFrom . '[' . $networkFrom . '] => ' . $userTo . '[' . $networkTo . ']';
+                $method = 'btn';
+                if(!empty($o_postdata->app)){
+                    $method = 'app';
+                }
+
+                $query->bindValue(':method', $method);
                 $query->bindValue(':amount', $amount);
                 $query->bindValue(':from', $ufrom['username']);
                 $query->bindValue(':to', $userTo);
