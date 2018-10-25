@@ -26,7 +26,5 @@ if(!empty($o_postdata) && is_object($o_postdata)){
         $json = [
             'error' => true
         ];
-        // TODO: remove debug info {DEVDEVDEV}
-        // $json['msg'] = $e->getMessage();
     }
 }

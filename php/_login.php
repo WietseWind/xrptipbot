@@ -120,98 +120,100 @@ if(!empty($o_postdata) && is_object($o_postdata) && !empty($o_postdata->name)){
         $tipsSent = 0;
         $tipsReceived = 0;
 
-        if(isset($row[0]) && !empty($row[0]['username'])) {
-            $query = $db->prepare('SELECT count(1) as _count, sum(amount) as _sum FROM tip WHERE `from_user` = :name AND (`network` = :network OR `from_network` = :network)');
-            $query->bindParam(':name', $row[0]['username']);
-            $query->bindParam(':network', $row[0]['network']);
+        if (empty($o_postdata->nohistory)) {
+            if(isset($row[0]) && !empty($row[0]['username'])) {
+                $query = $db->prepare('SELECT count(1) as _count, sum(amount) as _sum FROM tip WHERE `from_user` = :name AND (`network` = :network OR `from_network` = :network)');
+                $query->bindParam(':name', $row[0]['username']);
+                $query->bindParam(':network', $row[0]['network']);
+                $query->execute();
+                $tipsSent = $query->fetch(PDO::FETCH_ASSOC);
+
+                $query = $db->prepare('SELECT count(1) as _count, sum(amount) as _sum FROM tip WHERE `to_user` = :name AND (`network` = :network OR `to_network` = :network)');
+                $query->bindParam(':name', $row[0]['username']);
+                $query->bindParam(':network', $row[0]['network']);
+                $query->execute();
+                $tipsReceived = $query->fetch(PDO::FETCH_ASSOC);
+            }
+
+            /* - - - - - - - - - GET HISTORY - - - - - - - - */
+
+            $query = $db->prepare('SELECT `tip`.*, `message`.`context`, `tip`.`context` as `tipcontext`, `user`.`userid` FROM `tip` 
+                LEFT JOIN `user` ON 
+                (
+                    (`user`.`username` = `tip`.`from_user` AND `user`.`network` = `tip`.`from_network`) 
+                    OR
+                    (`user`.`username` = `tip`.`from_user` AND `user`.`network` = :network) 
+                )
+                LEFT JOIN `message` ON (`message`.`id` = `tip`.`message`) 
+                WHERE `tip`.`to_user` = :name AND (
+                    `tip`.`network` = :network
+                    OR
+                    `tip`.`to_network` = :network
+                )
+                GROUP BY `tip`.`id`
+                ORDER BY `tip`.`id` DESC '.$limit);
+            $query->bindParam(':name', $o_postdata->name);
+            $query->bindParam(':network', $o_postdata->type);
             $query->execute();
-            $tipsSent = $query->fetch(PDO::FETCH_ASSOC);
+            $history_received = $query->fetchAll(PDO::FETCH_ASSOC);
 
-            $query = $db->prepare('SELECT count(1) as _count, sum(amount) as _sum FROM tip WHERE `to_user` = :name AND (`network` = :network OR `to_network` = :network)');
-            $query->bindParam(':name', $row[0]['username']);
-            $query->bindParam(':network', $row[0]['network']);
+            $query = $db->prepare('SELECT `tip`.*, `message`.`context`, `tip`.`context` as `tipcontext`, `user`.`userid` FROM `tip` 
+                LEFT JOIN `user` ON 
+                (
+                    (`user`.`username` = `tip`.`to_user` AND `user`.`network` = `tip`.`to_network`) 
+                    OR
+                    (`user`.`username` = `tip`.`to_user` AND `user`.`network` = :network) 
+                )
+                LEFT JOIN `message` ON (`message`.`id` = `tip`.`message`) 
+                WHERE `tip`.`from_user` = :name AND (
+                    `tip`.`network` = :network
+                    OR
+                    `tip`.`from_network` = :network
+                )
+                GROUP BY `tip`.`id`
+                ORDER BY `tip`.`id` DESC '.$limit);
+            $query->bindParam(':name', $o_postdata->name);
+            $query->bindParam(':network', $o_postdata->type);
             $query->execute();
-            $tipsReceived = $query->fetch(PDO::FETCH_ASSOC);
+            $history_sent = $query->fetchAll(PDO::FETCH_ASSOC);
+
+            $query = $db->prepare('SELECT * FROM deposit WHERE user = :name AND network = :network ORDER BY id DESC '.$limit);
+            $query->bindParam(':name', $o_postdata->name);
+            $query->bindParam(':network', $o_postdata->type);
+            $query->execute();
+            $history_deposits = $query->fetchAll(PDO::FETCH_ASSOC);
+
+            $query = $db->prepare('SELECT * FROM withdraw WHERE user = :name AND network = :network ORDER BY id DESC '.$limit);
+            $query->bindParam(':name', $o_postdata->name);
+            $query->bindParam(':network', $o_postdata->type);
+            $query->execute();
+            $history_withdrawals = $query->fetchAll(PDO::FETCH_ASSOC);
+
+            $donatedDeposits = 0;
+            $query = $db->prepare('SELECT sum(amount) a FROM deposit WHERE `destination_tag` = :tag');
+            $query->bindParam(':tag', $row[0]['public_destination_tag']);
+            $query->execute();
+            $donatedDepositSum = $query->fetchAll(PDO::FETCH_ASSOC);
+            if (!empty($donatedDepositSum)) {
+                $donatedDeposits = (float) $donatedDepositSum[0]['a'];
+            }
+
+            $ilpDeposited = 0;
+            $query = $db->prepare('SELECT sum(drops) a FROM ilp_deposits WHERE `user_destination_tag` = :tag');
+            $query->bindParam(':tag', $row[0]['destination_tag']);
+            $query->execute();
+            $ilpDonatedDepositSum = $query->fetchAll(PDO::FETCH_ASSOC);
+            if (!empty($ilpDonatedDepositSum)) {
+                $ilpDeposited = (float) $ilpDonatedDepositSum[0]['a'];
+                $ilpDeposited = $ilpDeposited / 1000000;
+            }
+
+            $query = $db->prepare('SELECT id, moment, drops, fee FROM ilp_deposits WHERE user = :name AND network = :network ORDER BY id DESC '.$limit);
+            $query->bindParam(':name', $o_postdata->name);
+            $query->bindParam(':network', $o_postdata->type);
+            $query->execute();
+            $history_ilpdeposits = $query->fetchAll(PDO::FETCH_ASSOC);
         }
-
-        /* - - - - - - - - - GET HISTORY - - - - - - - - */
-
-        $query = $db->prepare('SELECT `tip`.*, `message`.`context`, `tip`.`context` as `tipcontext`, `user`.`userid` FROM `tip` 
-            LEFT JOIN `user` ON 
-            (
-                (`user`.`username` = `tip`.`from_user` AND `user`.`network` = `tip`.`from_network`) 
-                OR
-                (`user`.`username` = `tip`.`from_user` AND `user`.`network` = :network) 
-            )
-            LEFT JOIN `message` ON (`message`.`id` = `tip`.`message`) 
-            WHERE `tip`.`to_user` = :name AND (
-                `tip`.`network` = :network
-                OR
-                `tip`.`to_network` = :network
-            )
-            GROUP BY `tip`.`id`
-            ORDER BY `tip`.`id` DESC '.$limit);
-        $query->bindParam(':name', $o_postdata->name);
-        $query->bindParam(':network', $o_postdata->type);
-        $query->execute();
-        $history_received = $query->fetchAll(PDO::FETCH_ASSOC);
-
-        $query = $db->prepare('SELECT `tip`.*, `message`.`context`, `tip`.`context` as `tipcontext`, `user`.`userid` FROM `tip` 
-            LEFT JOIN `user` ON 
-            (
-                (`user`.`username` = `tip`.`to_user` AND `user`.`network` = `tip`.`to_network`) 
-                OR
-                (`user`.`username` = `tip`.`to_user` AND `user`.`network` = :network) 
-            )
-            LEFT JOIN `message` ON (`message`.`id` = `tip`.`message`) 
-            WHERE `tip`.`from_user` = :name AND (
-                `tip`.`network` = :network
-                OR
-                `tip`.`from_network` = :network
-            )
-            GROUP BY `tip`.`id`
-            ORDER BY `tip`.`id` DESC '.$limit);
-        $query->bindParam(':name', $o_postdata->name);
-        $query->bindParam(':network', $o_postdata->type);
-        $query->execute();
-        $history_sent = $query->fetchAll(PDO::FETCH_ASSOC);
-
-        $query = $db->prepare('SELECT * FROM deposit WHERE user = :name AND network = :network ORDER BY id DESC '.$limit);
-        $query->bindParam(':name', $o_postdata->name);
-        $query->bindParam(':network', $o_postdata->type);
-        $query->execute();
-        $history_deposits = $query->fetchAll(PDO::FETCH_ASSOC);
-
-        $query = $db->prepare('SELECT * FROM withdraw WHERE user = :name AND network = :network ORDER BY id DESC '.$limit);
-        $query->bindParam(':name', $o_postdata->name);
-        $query->bindParam(':network', $o_postdata->type);
-        $query->execute();
-        $history_withdrawals = $query->fetchAll(PDO::FETCH_ASSOC);
-
-        $donatedDeposits = 0;
-        $query = $db->prepare('SELECT sum(amount) a FROM deposit WHERE `destination_tag` = :tag');
-        $query->bindParam(':tag', $row[0]['public_destination_tag']);
-        $query->execute();
-        $donatedDepositSum = $query->fetchAll(PDO::FETCH_ASSOC);
-        if (!empty($donatedDepositSum)) {
-            $donatedDeposits = (float) $donatedDepositSum[0]['a'];
-        }
-
-        $ilpDeposited = 0;
-        $query = $db->prepare('SELECT sum(drops) a FROM ilp_deposits WHERE `user_destination_tag` = :tag');
-        $query->bindParam(':tag', $row[0]['destination_tag']);
-        $query->execute();
-        $ilpDonatedDepositSum = $query->fetchAll(PDO::FETCH_ASSOC);
-        if (!empty($ilpDonatedDepositSum)) {
-            $ilpDeposited = (float) $ilpDonatedDepositSum[0]['a'];
-            $ilpDeposited = $ilpDeposited / 1000000;
-        }
-
-        $query = $db->prepare('SELECT id, moment, drops, fee FROM ilp_deposits WHERE user = :name AND network = :network ORDER BY id DESC '.$limit);
-        $query->bindParam(':name', $o_postdata->name);
-        $query->bindParam(':network', $o_postdata->type);
-        $query->execute();
-        $history_ilpdeposits = $query->fetchAll(PDO::FETCH_ASSOC);
 
         /* - - - - - - - END GET HISTORY - - - - - - - - */
 
@@ -221,18 +223,18 @@ if(!empty($o_postdata) && is_object($o_postdata) && !empty($o_postdata->name)){
             'network'    => $o_postdata->type,
             'channel' => substr(md5($row[0]['username'].$row[0]['destination_tag'].$row[0]['network']),0,20),
             'stats'   => [
-                'tipsSent' => $tipsSent,
-                'tipsReceived' => $tipsReceived,
-                'donatedDeposits' => $donatedDeposits,
-                'ilpDeposited' => $ilpDeposited,
+                'tipsSent' => @$tipsSent,
+                'tipsReceived' => @$tipsReceived,
+                'donatedDeposits' => @$donatedDeposits,
+                'ilpDeposited' => @$ilpDeposited,
                 'balance' => @$row[0]['balance']
             ],
             'history'   => [
-                'received' => $history_received,
-                'sent' => $history_sent,
-                'deposits' => $history_deposits,
-                'withdrawals' => $history_withdrawals,
-                'ilpdeposits' => $history_ilpdeposits,
+                'received' => @$history_received,
+                'sent' => @$history_sent,
+                'deposits' => @$history_deposits,
+                'withdrawals' => @$history_withdrawals,
+                'ilpdeposits' => @$history_ilpdeposits,
             ],
             'migrations' => empty($migrations) ? [] : $migrations
         ];
