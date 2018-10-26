@@ -136,6 +136,11 @@ if(!empty($o_postdata) && is_object($o_postdata) && !empty($o_postdata->name)){
             }
 
             /* - - - - - - - - - GET HISTORY - - - - - - - - */
+            $app_tips = '';
+            
+            if (!empty($o_postdata->app)) {
+                $app_tips = ' AND `tip`.`network` = "app" ';
+            }
 
             $query = $db->prepare('SELECT `tip`.*, `message`.`context`, `tip`.`context` as `tipcontext`, `user`.`userid` FROM `tip` 
                 LEFT JOIN `user` ON 
@@ -150,6 +155,7 @@ if(!empty($o_postdata) && is_object($o_postdata) && !empty($o_postdata->name)){
                     OR
                     `tip`.`to_network` = :network
                 )
+                '.$app_tips.'
                 GROUP BY `tip`.`id`
                 ORDER BY `tip`.`id` DESC '.$limit);
             $query->bindParam(':name', $o_postdata->name);
@@ -177,42 +183,46 @@ if(!empty($o_postdata) && is_object($o_postdata) && !empty($o_postdata->name)){
             $query->execute();
             $history_sent = $query->fetchAll(PDO::FETCH_ASSOC);
 
-            $query = $db->prepare('SELECT * FROM deposit WHERE user = :name AND network = :network ORDER BY id DESC '.$limit);
-            $query->bindParam(':name', $o_postdata->name);
-            $query->bindParam(':network', $o_postdata->type);
-            $query->execute();
-            $history_deposits = $query->fetchAll(PDO::FETCH_ASSOC);
+            if (empty($o_postdata->no_on_ledger)) {
+                $query = $db->prepare('SELECT * FROM deposit WHERE user = :name AND network = :network ORDER BY id DESC '.$limit);
+                $query->bindParam(':name', $o_postdata->name);
+                $query->bindParam(':network', $o_postdata->type);
+                $query->execute();
+                $history_deposits = $query->fetchAll(PDO::FETCH_ASSOC);
 
-            $query = $db->prepare('SELECT * FROM withdraw WHERE user = :name AND network = :network ORDER BY id DESC '.$limit);
-            $query->bindParam(':name', $o_postdata->name);
-            $query->bindParam(':network', $o_postdata->type);
-            $query->execute();
-            $history_withdrawals = $query->fetchAll(PDO::FETCH_ASSOC);
+                $query = $db->prepare('SELECT * FROM withdraw WHERE user = :name AND network = :network ORDER BY id DESC '.$limit);
+                $query->bindParam(':name', $o_postdata->name);
+                $query->bindParam(':network', $o_postdata->type);
+                $query->execute();
+                $history_withdrawals = $query->fetchAll(PDO::FETCH_ASSOC);
 
-            $donatedDeposits = 0;
-            $query = $db->prepare('SELECT sum(amount) a FROM deposit WHERE `destination_tag` = :tag');
-            $query->bindParam(':tag', $row[0]['public_destination_tag']);
-            $query->execute();
-            $donatedDepositSum = $query->fetchAll(PDO::FETCH_ASSOC);
-            if (!empty($donatedDepositSum)) {
-                $donatedDeposits = (float) $donatedDepositSum[0]['a'];
+                $donatedDeposits = 0;
+                $query = $db->prepare('SELECT sum(amount) a FROM deposit WHERE `destination_tag` = :tag');
+                $query->bindParam(':tag', $row[0]['public_destination_tag']);
+                $query->execute();
+                $donatedDepositSum = $query->fetchAll(PDO::FETCH_ASSOC);
+                if (!empty($donatedDepositSum)) {
+                    $donatedDeposits = (float) $donatedDepositSum[0]['a'];
+                }
             }
 
-            $ilpDeposited = 0;
-            $query = $db->prepare('SELECT sum(drops) a FROM ilp_deposits WHERE `user_destination_tag` = :tag');
-            $query->bindParam(':tag', $row[0]['destination_tag']);
-            $query->execute();
-            $ilpDonatedDepositSum = $query->fetchAll(PDO::FETCH_ASSOC);
-            if (!empty($ilpDonatedDepositSum)) {
-                $ilpDeposited = (float) $ilpDonatedDepositSum[0]['a'];
-                $ilpDeposited = $ilpDeposited / 1000000;
-            }
+            if (empty($o_postdata->no_ilp)) {
+                $ilpDeposited = 0;
+                $query = $db->prepare('SELECT sum(drops) a FROM ilp_deposits WHERE `user_destination_tag` = :tag');
+                $query->bindParam(':tag', $row[0]['destination_tag']);
+                $query->execute();
+                $ilpDonatedDepositSum = $query->fetchAll(PDO::FETCH_ASSOC);
+                if (!empty($ilpDonatedDepositSum)) {
+                    $ilpDeposited = (float) $ilpDonatedDepositSum[0]['a'];
+                    $ilpDeposited = $ilpDeposited / 1000000;
+                }
 
-            $query = $db->prepare('SELECT id, moment, drops, fee FROM ilp_deposits WHERE user = :name AND network = :network ORDER BY id DESC '.$limit);
-            $query->bindParam(':name', $o_postdata->name);
-            $query->bindParam(':network', $o_postdata->type);
-            $query->execute();
-            $history_ilpdeposits = $query->fetchAll(PDO::FETCH_ASSOC);
+                $query = $db->prepare('SELECT id, moment, drops, fee FROM ilp_deposits WHERE user = :name AND network = :network ORDER BY id DESC '.$limit);
+                $query->bindParam(':name', $o_postdata->name);
+                $query->bindParam(':network', $o_postdata->type);
+                $query->execute();
+                $history_ilpdeposits = $query->fetchAll(PDO::FETCH_ASSOC);
+            }
         }
 
         /* - - - - - - - END GET HISTORY - - - - - - - - */
