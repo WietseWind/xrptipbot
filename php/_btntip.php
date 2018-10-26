@@ -15,10 +15,10 @@ if(!empty($o_postdata) && is_object($o_postdata)){
             $response['userTo'] = $userTo = preg_replace("@['\"\r\n]*@", "", $o_postdata->to->user);
             $response['amount'] = $amount = (float) $o_postdata->amount;
             
-            if ($amount < 0.01) $amount = 0.01;
             if(!empty($o_postdata->app)){
                 if ($amount > 20) $amount = 20;
             } else{
+                if ($amount < 0.01) $amount = 0.01;
                 if (!isset($o_postdata->noLimit)){
                     if ($amount > 5) $amount = 5;
                 }
