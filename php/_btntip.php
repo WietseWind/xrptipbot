@@ -16,6 +16,7 @@ if(!empty($o_postdata) && is_object($o_postdata)){
             $response['amount'] = $amount = (float) $o_postdata->amount;
             
             if(!empty($o_postdata->app)){
+                if ($amount < 0.000001) $amount = 0.000001;
                 if ($amount > 20) $amount = 20;
             } else{
                 if ($amount < 0.01) $amount = 0.01;
