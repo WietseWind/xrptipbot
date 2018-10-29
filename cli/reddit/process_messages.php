@@ -159,6 +159,16 @@ try {
             $msg_escaped = str_replace("'", "'\"'\"'", $msg);
             echo `cd /data/cli/reddit; php send_reaction.php $to_post '$msg_escaped'`;
             sleep(2);
+            try {
+                $query = $db->prepare('UPDATE `message` SET `processed` = 1, processed_moment = CURRENT_TIMESTAMP, action = "error", reaction = :reaction WHERE `ext_id` = :ext_id AND `network` = "reddit" AND processed_moment IS NULL LIMIT 1');
+                $query->bindValue(':ext_id', $to_post);
+                $query->bindValue(':reaction', $msg_escaped);
+                $query->execute();
+            }
+            catch (\Throwable $e) {
+                echo "\n ERROR: " . $e->getMessage() . "\n";
+            }
+
         }
     }
 }

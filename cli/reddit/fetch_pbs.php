@@ -6,6 +6,8 @@ require_once '/data/db.php';
 echo "\nProcessing REDDIT inbox messages...\n";
 
 $inbox_messages = $reddit_call('/message/unread?api_type=json', 'GET');
+print_r($inbox_messages);
+
 if(!empty(@$inbox_messages->data->children)){
     $r = (array) $inbox_messages->data->children;
 
