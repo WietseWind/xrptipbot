@@ -1,6 +1,6 @@
 <?php
 
-if(!empty($o_postdata) && is_object($o_postdata) && $_SERVER["HTTP_HOST"] == 'xrptipbot.internal:10060'){
+if(!empty($o_postdata) && is_object($o_postdata) && ($_SERVER["HTTP_HOST"] == 'xrptipbot.internal:10060' || $_SERVER["HTTP_HOST"] == '127.0.0.1')){
     $fee = 0;
     $insertId = 0;
     $channel = '';
@@ -10,19 +10,21 @@ if(!empty($o_postdata) && is_object($o_postdata) && $_SERVER["HTTP_HOST"] == 'xr
     try {
         if (!empty($o_postdata->totalDrops) && $o_postdata->totalDrops > $fee && !empty($o_postdata->network) && !empty($o_postdata->username) && !empty($o_postdata->connectionTag) && !empty($o_postdata->sourceAccount) && !empty($o_postdata->destinationAccount) && !empty($o_postdata->sharedSecret)) {
             $query = $db->prepare('
-                INSERT IGNORE INTO `ilp_deposits`
-                    (`connectionTag`, `sharedSecret`, `sourceAccount`, `destinationAccount`, `drops`, `fee`, `network`, `user`)
+                INSERT INTO `ilp_deposits`
+                    (`connectionTag`, `drops`, `fee`, `network`, `user`, `strata_id`)
                 VALUES
-                    (:connectionTag, :sharedSecret, :sourceAccount, :destinationAccount, :drops, '.$fee.', :network, :user)
+                    (:connectionTag, :drops, '.$fee.', :network, :user, :strata_id)
+                ON DUPLICATE KEY UPDATE drops = drops + :drops, moment = CURRENT_TIMESTAMP
             ');
             // Todo: fix dynamic, shared, fee
             $query->bindParam(':connectionTag', $o_postdata->connectionTag);
-            $query->bindParam(':sharedSecret', $o_postdata->sharedSecret);
-            $query->bindParam(':sourceAccount', $o_postdata->sourceAccount);
-            $query->bindParam(':destinationAccount', $o_postdata->destinationAccount);
+            // $query->bindParam(':sharedSecret', $o_postdata->sharedSecret);
+            // $query->bindParam(':sourceAccount', $o_postdata->sourceAccount);
+            // $query->bindParam(':destinationAccount', $o_postdata->destinationAccount);
             $query->bindParam(':drops', $o_postdata->totalDrops);
             $query->bindParam(':network', $o_postdata->network);
             $query->bindParam(':user', $o_postdata->username);
+            $query->bindParam(':strata_id', @$o_postdata->strata_id);
 
             $query->execute();
             $insertId = (int) @$db->lastInsertId();
@@ -85,8 +87,8 @@ if(!empty($o_postdata) && is_object($o_postdata) && $_SERVER["HTTP_HOST"] == 'xr
                             'feeDrops' => $fee
                         ])];
 
-                        $context = stream_context_create([ 'http' => [ 'method' => 'POST', 'header' => 'Content-type: application/x-www-form-urlencoded', 'content' => http_build_query($postdata) ] ]);
-                        $result = @file_get_contents('https://'.$__ABLY_CREDENTIAL.'@rest.ably.io/channels/'.$channel.'/messages', false, $context);
+                        // $context = stream_context_create([ 'http' => [ 'method' => 'POST', 'header' => 'Content-type: application/x-www-form-urlencoded', 'content' => http_build_query($postdata) ] ]);
+                        // $result = @file_get_contents('https://'.$__ABLY_CREDENTIAL.'@rest.ably.io/channels/'.$channel.'/messages', false, $context);
                     }
                 }
             }
