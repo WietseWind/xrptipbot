@@ -18,6 +18,8 @@ $data = [
     print_r($post);
 }
 
+$ok = false;
+
 if(empty($original_text) || !empty($post->json->data->things[0]->data->name) || (!empty($post->json->errors[0][0]) && preg_match("@delete@i", $post->json->errors[0][0]))){
     if(!empty($post->json->errors)){
         echo "\n\nProcessed, but WITH ERRORS: ";
@@ -25,6 +27,7 @@ if(empty($original_text) || !empty($post->json->data->things[0]->data->name) || 
     }else{
         if(!empty($post->json->data->things[0]->data->name)){
             echo "\n\nPosted, " . @$post->json->data->things[0]->data->name . ' ^ ' . @$post->json->data->things[0]->data->parent_id . ' @ ' . @$post->json->data->things[0]->data->permalink . "\n";
+            $ok = true;
         }else{
             if(empty($original_text)){
                 echo "\n\nSuppressed, no text.\n";
@@ -50,4 +53,15 @@ if(empty($original_text) || !empty($post->json->data->things[0]->data->name) || 
     echo "\n\nERROR\n";
     print_r($post);
     echo "\n";
+}
+
+$to = trim(@$argv[3]);
+if (!$ok && !empty($to) && !empty($text)) {
+  echo 'OOPS... Probably need to try a DM to '.$to.PHP_EOL;
+  print_r($reddit_call('/api/compose', 'POST', [
+    'api_type' => 'json',
+    'to' => $to,
+    'subject' => 'You received a Tip (some XRP) :)',
+    'text' => $text
+  ]));
 }

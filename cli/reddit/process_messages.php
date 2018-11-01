@@ -157,7 +157,8 @@ try {
             echo "\n--- Sending reply --- ... \n";
             $to_post = $m['ext_id'];
             $msg_escaped = str_replace("'", "'\"'\"'", $msg);
-            echo `cd /data/cli/reddit; php send_reaction.php $to_post '$msg_escaped'`;
+            $usr_escaped = str_replace("'", "'\"'\"'", @$m['_to_user_name']);
+            echo `cd /data/cli/reddit; php send_reaction.php $to_post '$msg_escaped' '$usr_escaped'`;
             sleep(2);
             try {
                 $query = $db->prepare('UPDATE `message` SET `processed` = 1, processed_moment = CURRENT_TIMESTAMP, action = "error", reaction = :reaction WHERE `ext_id` = :ext_id AND `network` = "reddit" AND processed_moment IS NULL LIMIT 1');
