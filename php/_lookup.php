@@ -63,7 +63,7 @@ if(!empty($o_postdata) && is_object($o_postdata)){
                     (
                         (`user`.`network` != "discord" AND `user`.`username` LIKE :wildcard)
                         OR
-                        (`user`.`network` = "discord" AND `user`.`userid` LIKE :wildcard)
+                        (`user`.`network` = "discord" AND (`user`.`userid` LIKE :wildcard OR `user`.`username` LIKE :lookup))
                     )
                 GROUP BY `user`.`destination_tag`
                 ORDER BY 
