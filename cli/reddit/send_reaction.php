@@ -62,6 +62,6 @@ if (!$ok && !empty($to) && !empty($text)) {
     'api_type' => 'json',
     'to' => $to,
     'subject' => 'You received a Tip (some XRP) :)',
-    'text' => $text
+    'text' => str_replace(" to ", ", ", str_replace("you have tipped", "tipped you", str_replace("Awesome", "Awesome, /u/", $text))),
   ]));
 }
