@@ -26,6 +26,30 @@ if(!empty($o_postdata) && is_object($o_postdata)){
             }
 
             $toField = $fromField = 'username';
+
+            if ($networkFrom == 'discord' && !preg_match("@^[0-9]+$@", $userFrom)) {
+                // Resolve from-user from username to userid
+                // Search in discord "userid" and get "username"
+                $query = $db->prepare('SELECT username FROM user WHERE network = "discord" AND userid = :u');
+                $query->bindValue(':u', $userFrom);
+                $query->execute();
+                $duser = $query->fetchAll(PDO::FETCH_ASSOC);
+                if (!empty($duser)) {
+                    $userFrom = $duser[0]['username'];
+                }
+            }
+            if ($networkTo == 'discord' && !preg_match("@^[0-9]+$@", $userTo)) {
+                // Resolve from-user from username to userid
+                // Search in discord "userid" and get "username"
+                $query = $db->prepare('SELECT username FROM user WHERE network = "discord" AND userid = :u');
+                $query->bindValue(':u', $userTo);
+                $query->execute();
+                $duser = $query->fetchAll(PDO::FETCH_ASSOC);
+                // print_r($duser);
+                if (!empty($duser)) {
+                    $userTo = $duser[0]['username'];
+                }
+            }
             // if ($networkFrom == 'discord') $fromField = 'userid';
             // if ($networkTo == 'discord') $toField = 'userid';
             $query = $db->prepare('
