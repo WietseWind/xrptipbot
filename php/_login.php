@@ -138,9 +138,9 @@ if(!empty($o_postdata) && is_object($o_postdata) && !empty($o_postdata->name)){
             /* - - - - - - - - - GET HISTORY - - - - - - - - */
             $app_tips = '';
             
-            if (!empty($o_postdata->app)) {
-                $app_tips = ' AND `tip`.`network` = "app" ';
-            }
+            // if (!empty($o_postdata->app)) {
+            //     $app_tips = ' AND `tip`.`network` = "app" ';
+            // }
 
             $query = $db->prepare('SELECT `tip`.*, `message`.`context`, `tip`.`context` as `tipcontext`, `user`.`userid` FROM `tip` 
                 LEFT JOIN `user` ON 
