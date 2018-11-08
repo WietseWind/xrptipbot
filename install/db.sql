@@ -13,7 +13,7 @@ CREATE TABLE `deposit` (
   `ledger` bigint(20) NOT NULL,
   `balance_pre` decimal(20,6) NOT NULL DEFAULT '0.000000',
   `balance_post` decimal(20,6) NOT NULL DEFAULT '0.000000',
-  `network` enum('reddit','twitter','discord') NOT NULL DEFAULT 'reddit',
+  `network` enum('reddit','twitter','discord','internal') NOT NULL DEFAULT 'reddit',
   `type` enum('tx','escrow') NOT NULL DEFAULT 'tx',
   PRIMARY KEY (`id`),
   UNIQUE KEY `tx_2` (`tx`),
@@ -30,8 +30,9 @@ CREATE TABLE `deposit` (
   KEY `fee` (`fee`),
   KEY `real_amount` (`real_amount`),
   KEY `network` (`network`),
-  KEY `type` (`type`)
-) ENGINE=InnoDB AUTO_INCREMENT=1218 DEFAULT CHARSET=utf8mb4;
+  KEY `type` (`type`),
+  KEY `network_2` (`network`,`user`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
 -- Create syntax for TABLE 'escrow'
 CREATE TABLE `escrow` (
@@ -61,38 +62,63 @@ CREATE TABLE `escrow` (
   KEY `sequence` (`sequence`),
   KEY `date` (`date`),
   KEY `cancel` (`cancel`)
-) ENGINE=InnoDB AUTO_INCREMENT=42 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
 -- Create syntax for TABLE 'ilp_deposits'
 CREATE TABLE `ilp_deposits` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `moment` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `connectionTag` varchar(100) COLLATE utf8mb4_bin NOT NULL DEFAULT '',
-  `sharedSecret` varchar(100) COLLATE utf8mb4_bin NOT NULL DEFAULT '',
-  `sourceAccount` varchar(1024) COLLATE utf8mb4_bin NOT NULL DEFAULT '',
-  `destinationAccount` varchar(1024) COLLATE utf8mb4_bin NOT NULL DEFAULT '',
+  `connectionTag` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '',
   `drops` int(10) unsigned NOT NULL,
   `fee` int(10) unsigned NOT NULL,
-  `network` enum('twitter','reddit','discord') COLLATE utf8mb4_bin DEFAULT NULL,
-  `user` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
+  `network` enum('twitter','reddit','discord','internal') CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `user` varchar(100) DEFAULT NULL,
+  `user_destination_tag` bigint(20) DEFAULT NULL,
+  `strata_id` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `strata_id` (`strata_id`),
+  KEY `moment` (`moment`),
+  KEY `connectionTag` (`connectionTag`),
+  KEY `drops` (`drops`),
+  KEY `network` (`network`),
+  KEY `fee` (`fee`),
+  KEY `user` (`user`),
+  KEY `user_destination_tag` (`user_destination_tag`),
+  KEY `user_2` (`user`,`network`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
+
+-- Create syntax for TABLE 'ilp_deposits_20181030'
+CREATE TABLE `ilp_deposits_20181030` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `moment` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `connectionTag` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '',
+  `sharedSecret` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '',
+  `sourceAccount` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '',
+  `destinationAccount` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '',
+  `drops` int(10) unsigned NOT NULL,
+  `fee` int(10) unsigned NOT NULL,
+  `network` enum('twitter','reddit','discord') CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `user` varchar(100) DEFAULT NULL,
   `user_destination_tag` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `sharedSecret` (`sharedSecret`,`user`,`network`),
+  UNIQUE KEY `sharedSecret` (`sharedSecret`,`network`),
   KEY `moment` (`moment`),
   KEY `connectionTag` (`connectionTag`),
   KEY `sourceAccount` (`sourceAccount`(191)),
   KEY `destinationAccount` (`destinationAccount`(191)),
   KEY `drops` (`drops`),
   KEY `network` (`network`),
+  KEY `fee` (`fee`),
   KEY `user` (`user`),
-  KEY `fee` (`fee`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+  KEY `user_destination_tag` (`user_destination_tag`),
+  KEY `user_2` (`user`,`network`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
 -- Create syntax for TABLE 'message'
 CREATE TABLE `message` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `moment` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `network` enum('reddit','twitter','discord') NOT NULL DEFAULT 'reddit',
+  `network` enum('reddit','twitter','discord','internal') NOT NULL DEFAULT 'reddit',
   `ext_id` varchar(64) DEFAULT NULL,
   `parent_id` varchar(64) DEFAULT NULL,
   `parent_author` varchar(64) DEFAULT NULL,
@@ -119,7 +145,7 @@ CREATE TABLE `message` (
   KEY `ext_Id` (`ext_id`),
   KEY `parent_id` (`parent_id`),
   KEY `parent_author` (`parent_author`)
-) ENGINE=InnoDB AUTO_INCREMENT=35191 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
 -- Create syntax for TABLE 'reddit_comments'
 CREATE TABLE `reddit_comments` (
@@ -131,7 +157,7 @@ CREATE TABLE `reddit_comments` (
   `matched` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `subreddit` (`subreddit`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
 -- Create syntax for TABLE 'tip'
 CREATE TABLE `tip` (
@@ -143,10 +169,10 @@ CREATE TABLE `tip` (
   `message` int(11) unsigned DEFAULT NULL,
   `sender_balance` decimal(20,6) NOT NULL,
   `recipient_balance` decimal(20,6) DEFAULT NULL,
-  `network` enum('reddit','twitter','discord','btn') NOT NULL DEFAULT 'reddit',
+  `network` enum('reddit','twitter','discord','btn','app') NOT NULL DEFAULT 'reddit',
   `context` varchar(100) DEFAULT NULL,
-  `from_network` enum('reddit','twitter','discord') DEFAULT NULL,
-  `to_network` enum('reddit','twitter','discord') DEFAULT NULL,
+  `from_network` enum('reddit','twitter','discord','internal') DEFAULT NULL,
+  `to_network` enum('reddit','twitter','discord','internal') DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `reddit_post` (`message`),
   UNIQUE KEY `message` (`message`),
@@ -158,7 +184,7 @@ CREATE TABLE `tip` (
   KEY `context` (`context`),
   KEY `from_network` (`from_network`),
   KEY `to_network` (`to_network`)
-) ENGINE=InnoDB AUTO_INCREMENT=38056 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
 -- Create syntax for TABLE 'transaction'
 CREATE TABLE `transaction` (
@@ -179,7 +205,7 @@ CREATE TABLE `transaction` (
   KEY `xrp` (`xrp`),
   KEY `tag` (`tag`),
   KEY `moment` (`moment`)
-) ENGINE=InnoDB AUTO_INCREMENT=547619 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
 -- Create syntax for TABLE 'user'
 CREATE TABLE `user` (
@@ -191,7 +217,7 @@ CREATE TABLE `user` (
   `balance` decimal(20,6) NOT NULL DEFAULT '0.000000',
   `destination_tag` bigint(20) NOT NULL AUTO_INCREMENT,
   `destination_wallet` varchar(64) NOT NULL DEFAULT 'rPEPPER7kfTD9w2To4CQk6UCfuHM9c6GDY',
-  `network` enum('reddit','twitter','discord') NOT NULL DEFAULT 'reddit',
+  `network` enum('reddit','twitter','discord','internal') NOT NULL DEFAULT 'reddit',
   `rejecttips` timestamp NULL DEFAULT NULL,
   `disablenotifications` int(1) unsigned NOT NULL DEFAULT '0',
   `public_destination_tag` bigint(20) DEFAULT NULL,
@@ -205,8 +231,51 @@ CREATE TABLE `user` (
   KEY `destination_wallet` (`destination_wallet`),
   KEY `network` (`network`),
   KEY `userid` (`userid`(191)),
-  KEY `public_destination_tag` (`public_destination_tag`)
-) ENGINE=InnoDB AUTO_INCREMENT=8149 DEFAULT CHARSET=utf8mb4;
+  KEY `public_destination_tag` (`public_destination_tag`),
+  KEY `rejecttips` (`rejecttips`),
+  KEY `disablenotifications` (`disablenotifications`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
+
+-- Create syntax for VIEW 'v_rPEPPER'
+CREATE ALGORITHM=UNDEFINED DEFINER=`newuser`@`%` SQL SECURITY DEFINER VIEW `v_rPEPPER`
+AS SELECT
+   `transaction`.`id` AS `id`,
+   `transaction`.`hash` AS `hash`,
+   `transaction`.`ledger` AS `ledger`,
+   `transaction`.`from` AS `from`,
+   `transaction`.`to` AS `to`,
+   `transaction`.`xrp` AS `xrp`,
+   `transaction`.`tag` AS `tag`,
+   `transaction`.`moment` AS `moment`
+FROM `transaction` where (`transaction`.`to` = 'rPEPPER7kfTD9w2To4CQk6UCfuHM9c6GDY') order by `transaction`.`id` desc;
+
+-- Create syntax for VIEW 'v_withdraw_error'
+CREATE ALGORITHM=UNDEFINED DEFINER=`newuser`@`%` SQL SECURITY DEFINER VIEW `v_withdraw_error`
+AS SELECT
+   `withdraw`.`id` AS `id`,
+   `withdraw`.`moment` AS `moment`,
+   `withdraw`.`user` AS `user`,
+   `withdraw`.`from_wallet` AS `from_wallet`,
+   `withdraw`.`to_wallet` AS `to_wallet`,
+   `withdraw`.`destination_tag` AS `destination_tag`,
+   `withdraw`.`amount` AS `amount`,
+   `withdraw`.`fee` AS `fee`,
+   `withdraw`.`tx` AS `tx`,
+   `withdraw`.`ledger` AS `ledger`,
+   `withdraw`.`processed` AS `processed`,
+   `withdraw`.`ip` AS `ip`,
+   `withdraw`.`donate` AS `donate`,
+   `withdraw`.`log` AS `log`
+FROM `withdraw` where ((isnull(`withdraw`.`fee`) or (`withdraw`.`fee` < 10)) and (`withdraw`.`processed` is not null)) order by `withdraw`.`id` desc;
+
+-- Create syntax for VIEW 'v_wrwBalance'
+CREATE ALGORITHM=UNDEFINED DEFINER=`newuser`@`%` SQL SECURITY DEFINER VIEW `v_wrwBalance`
+AS SELECT
+   `user`.`username` AS `username`,
+   `user`.`userid` AS `userid`,
+   `user`.`balance` AS `balance`,
+   `user`.`network` AS `network`
+FROM `user` where ((`user`.`username` in ('wietsewind','pepperew','xrptipbot')) or (`user`.`userid` in ('wietsewind','pepperew','xrptipbot'))) order by `user`.`username` desc;
 
 -- Create syntax for TABLE 'withdraw'
 CREATE TABLE `withdraw` (
@@ -225,7 +294,7 @@ CREATE TABLE `withdraw` (
   `ip` varchar(40) DEFAULT NULL,
   `donate` decimal(20,6) DEFAULT NULL,
   `log` longtext,
-  `network` enum('reddit','twitter','discord') NOT NULL DEFAULT 'reddit',
+  `network` enum('reddit','twitter','discord','internal') NOT NULL DEFAULT 'reddit',
   `memo` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `tx_2` (`tx`),
@@ -241,5 +310,48 @@ CREATE TABLE `withdraw` (
   KEY `ip` (`ip`),
   KEY `donate` (`donate`),
   KEY `fee` (`fee`),
-  KEY `network` (`network`)
-) ENGINE=InnoDB AUTO_INCREMENT=1394 DEFAULT CHARSET=utf8mb4;
+  KEY `network` (`network`),
+  KEY `user_2` (`user`,`network`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
+
+-- Create syntax for FUNCTION 'levenshtein'
+CREATE DEFINER=`newuser`@`%` FUNCTION `levenshtein`( s1 VARCHAR(255), s2 VARCHAR(255) ) RETURNS int(11)
+    DETERMINISTIC
+BEGIN
+        DECLARE s1_len, s2_len, i, j, c, c_temp, cost INT;
+        DECLARE s1_char CHAR;
+        -- max strlen=255
+        DECLARE cv0, cv1 VARBINARY(256);
+
+        SET s1_len = CHAR_LENGTH(s1), s2_len = CHAR_LENGTH(s2), cv1 = 0x00, j = 1, i = 1, c = 0;
+
+        IF s1 = s2 THEN
+            RETURN 0;
+        ELSEIF s1_len = 0 THEN
+            RETURN s2_len;
+        ELSEIF s2_len = 0 THEN
+            RETURN s1_len;
+        ELSE
+            WHILE j <= s2_len DO
+                SET cv1 = CONCAT(cv1, UNHEX(HEX(j))), j = j + 1;
+            END WHILE;
+            WHILE i <= s1_len DO
+                SET s1_char = SUBSTRING(s1, i, 1), c = i, cv0 = UNHEX(HEX(i)), j = 1;
+                WHILE j <= s2_len DO
+                    SET c = c + 1;
+                    IF s1_char = SUBSTRING(s2, j, 1) THEN
+                        SET cost = 0; ELSE SET cost = 1;
+                    END IF;
+                    SET c_temp = CONV(HEX(SUBSTRING(cv1, j, 1)), 16, 10) + cost;
+                    IF c > c_temp THEN SET c = c_temp; END IF;
+                    SET c_temp = CONV(HEX(SUBSTRING(cv1, j+1, 1)), 16, 10) + 1;
+                    IF c > c_temp THEN
+                        SET c = c_temp;
+                    END IF;
+                    SET cv0 = CONCAT(cv0, UNHEX(HEX(c))), j = j + 1;
+                END WHILE;
+                SET cv1 = cv0, i = i + 1;
+            END WHILE;
+        END IF;
+        RETURN c;
+    END;
