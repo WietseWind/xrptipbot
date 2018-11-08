@@ -25,6 +25,7 @@ if(!empty($o_postdata) && is_object($o_postdata)){
                     )
                 WHERE 
                     `user`.public_destination_tag = :tag
+                    AND `user`.`network` != "internal"
                     -- OR
                     -- `user`.destination_tag = :tag
                 GROUP BY `user`.`destination_tag`
@@ -57,6 +58,8 @@ if(!empty($o_postdata) && is_object($o_postdata)){
                     )
                 WHERE 
                     `user`.last_login IS NOT NULL 
+                    AND 
+                    `user`.`network` != "internal"
                     AND 
                     `user`.rejecttips IS NULL 
                     AND 
