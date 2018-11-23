@@ -87,33 +87,6 @@ CREATE TABLE `ilp_deposits` (
   KEY `user_2` (`user`,`network`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
--- Create syntax for TABLE 'ilp_deposits_20181030'
-CREATE TABLE `ilp_deposits_20181030` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `moment` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `connectionTag` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '',
-  `sharedSecret` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '',
-  `sourceAccount` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '',
-  `destinationAccount` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL DEFAULT '',
-  `drops` int(10) unsigned NOT NULL,
-  `fee` int(10) unsigned NOT NULL,
-  `network` enum('twitter','reddit','discord') CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `user` varchar(100) DEFAULT NULL,
-  `user_destination_tag` bigint(20) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `sharedSecret` (`sharedSecret`,`network`),
-  KEY `moment` (`moment`),
-  KEY `connectionTag` (`connectionTag`),
-  KEY `sourceAccount` (`sourceAccount`(191)),
-  KEY `destinationAccount` (`destinationAccount`(191)),
-  KEY `drops` (`drops`),
-  KEY `network` (`network`),
-  KEY `fee` (`fee`),
-  KEY `user` (`user`),
-  KEY `user_destination_tag` (`user_destination_tag`),
-  KEY `user_2` (`user`,`network`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
-
 -- Create syntax for TABLE 'message'
 CREATE TABLE `message` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
@@ -236,19 +209,6 @@ CREATE TABLE `user` (
   KEY `disablenotifications` (`disablenotifications`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
--- Create syntax for VIEW 'v_rPEPPER'
-CREATE ALGORITHM=UNDEFINED DEFINER=`newuser`@`%` SQL SECURITY DEFINER VIEW `v_rPEPPER`
-AS SELECT
-   `transaction`.`id` AS `id`,
-   `transaction`.`hash` AS `hash`,
-   `transaction`.`ledger` AS `ledger`,
-   `transaction`.`from` AS `from`,
-   `transaction`.`to` AS `to`,
-   `transaction`.`xrp` AS `xrp`,
-   `transaction`.`tag` AS `tag`,
-   `transaction`.`moment` AS `moment`
-FROM `transaction` where (`transaction`.`to` = 'rPEPPER7kfTD9w2To4CQk6UCfuHM9c6GDY') order by `transaction`.`id` desc;
-
 -- Create syntax for VIEW 'v_withdraw_error'
 CREATE ALGORITHM=UNDEFINED DEFINER=`newuser`@`%` SQL SECURITY DEFINER VIEW `v_withdraw_error`
 AS SELECT
@@ -267,15 +227,6 @@ AS SELECT
    `withdraw`.`donate` AS `donate`,
    `withdraw`.`log` AS `log`
 FROM `withdraw` where ((isnull(`withdraw`.`fee`) or (`withdraw`.`fee` < 10)) and (`withdraw`.`processed` is not null)) order by `withdraw`.`id` desc;
-
--- Create syntax for VIEW 'v_wrwBalance'
-CREATE ALGORITHM=UNDEFINED DEFINER=`newuser`@`%` SQL SECURITY DEFINER VIEW `v_wrwBalance`
-AS SELECT
-   `user`.`username` AS `username`,
-   `user`.`userid` AS `userid`,
-   `user`.`balance` AS `balance`,
-   `user`.`network` AS `network`
-FROM `user` where ((`user`.`username` in ('wietsewind','pepperew','xrptipbot')) or (`user`.`userid` in ('wietsewind','pepperew','xrptipbot'))) order by `user`.`username` desc;
 
 -- Create syntax for TABLE 'withdraw'
 CREATE TABLE `withdraw` (
@@ -296,6 +247,8 @@ CREATE TABLE `withdraw` (
   `log` longtext,
   `network` enum('reddit','twitter','discord','internal') NOT NULL DEFAULT 'reddit',
   `memo` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `escrowts` int(10) unsigned DEFAULT NULL,
+  `escrow_release_hash` varchar(128) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `tx_2` (`tx`),
   KEY `moment` (`moment`),
@@ -311,7 +264,10 @@ CREATE TABLE `withdraw` (
   KEY `donate` (`donate`),
   KEY `fee` (`fee`),
   KEY `network` (`network`),
-  KEY `user_2` (`user`,`network`)
+  KEY `user_2` (`user`,`network`),
+  KEY `escrowts` (`escrowts`),
+  KEY `escrow_release_hash` (`escrow_release_hash`),
+  KEY `escrow_release_hash_2` (`escrow_release_hash`,`escrowts`,`ledger`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 
 -- Create syntax for FUNCTION 'levenshtein'

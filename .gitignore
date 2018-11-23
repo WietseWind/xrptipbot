@@ -1,6 +1,7 @@
 /.config.js
 /config.php
 /cli/process_withdraw/log_processOne.txt
+/cli/process_withdraw/log_processOneEscrow.txt
 /cli/reddit/composer.lock
 /cli/reddit/log/fetch_pbs.txt
 /cli/reddit/log/fetch_comments.txt

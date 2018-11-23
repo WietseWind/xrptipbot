@@ -70,6 +70,7 @@ is symlinked to the HTTP webroot, and a crontab is present to run all the script
 # Process withdrawals
 * *     * * *   cd /data/cli/process_withdraw; php processOne.php > log_processOne.txt
 * *     * * *   sleep 30; cd /data/cli/process_withdraw; php processOne.php >> log_processOne.txt
+* *     * * *   sleep 30; cd /data/cli/process_withdraw; php processOneEscrow.php >> log_processOneEscrow.txt
 ```
 
 There is one script that runs all the time in the background; `nodejs/storetransactions/run.sh` (in `/data/`). This

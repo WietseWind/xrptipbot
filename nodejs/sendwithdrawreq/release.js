@@ -21,23 +21,23 @@ var startLedger = 0
 
   var argv = process.argv.reverse()[0].split(':')
 
-  if(argv.length !== 7) {
+  if(argv.length !== 4) {
     console.log('Invalid # arguments')
     process.exit(1)
   }
 
-  var payFrom = argv[1]
-  var payTo = argv[2]
-  var payTo_tag = parseInt(argv[3])
-  var payFrom_tag = parseInt(argv[4])
-  var xrpAmount = parseFloat(argv[0])
-  var memo = (argv[5] + '').toUpperCase()
-  var escrow = parseInt(argv[6])
+  // console.log(argv);
+  // process.exit(0)
+
+  var payFrom = argv[0]
+  var payTo = argv[1]
+  var memo = (argv[2] + '').toUpperCase()
+  var escrow = parseInt(argv[3])
   if (isNaN(escrow)) {
     escrow = 0
   }
 
-  console.log('< PAY ' + xrpAmount + ' XRP FROM ' + payFrom + ' TO ' + payTo + ':' + payTo_tag)
+  console.log('< RELEASE ESCROW SEQ ' + escrow + ' FROM ' + payFrom + ' TO ' + payTo)
 
   var signed_tx = null
   var tx_at_ledger = 0
@@ -54,31 +54,28 @@ var _processTransaction = function () {
     console.log('<< [getAccountInfo] done, info: ', accInfo)
 
     var transaction = {
-      "TransactionType" : escrow > 0 ? "EscrowCreate" : "Payment",
+      "TransactionType" : "EscrowFinish",
       "Account" : payFrom,
       "Fee" : _fee+"",
-      "Destination" : payTo,
-      "DestinationTag" : payTo_tag,
-      "Amount" : (xrpAmount*1000*1000).toFixed(0)+"",
-      "LastLedgerSequence" : closedLedger+ledgerAwait,
+      "Owner" : payFrom,
+      "OfferSequence" : escrow,
       "Sequence" : accInfo.sequence,
     }
-    if (escrow > 0) {
-      transaction.FinishAfter = escrow
-    }
-    if (memo !== '') {
-      transaction.Memos = [
-        {
-          Memo: {
-            MemoType: Buffer.from('XrpTipBotNote', 'utf8').toString('hex').toUpperCase(),
-            MemoData: memo
-          }
+    transaction.Memos = [
+      {
+        Memo: {
+          MemoType: Buffer.from('XrpTipBotEscrow', 'utf8').toString('hex').toUpperCase(),
+          MemoData: Buffer.from('AutoRelease', 'utf8').toString('hex').toUpperCase()
         }
-      ]    
-    }
-
-    if (typeof payFrom_tag !== 'undefined' && !isNaN(payFrom_tag) && payFrom_tag > 0) {
-      transaction.SourceTag = payFrom_tag
+      }
+    ]    
+    if (memo !== '') {
+      transaction.Memos.push({
+        Memo: {
+          MemoType: Buffer.from('XrpTipBotNote', 'utf8').toString('hex').toUpperCase(),
+          MemoData: memo
+        }
+      })
     }
 
     // transaction = {"tx_json" : transaction }
