@@ -108,7 +108,7 @@ if(!empty($o_postdata) && is_object($o_postdata)){
                         withdraw.`amount`,
                         'withdraw' as `type`,
                         withdraw.`network`,
-                        '' as context,
+                        withdraw.escrowts as context,
                         null as message
                     FROM `withdraw`
                     WHERE `amount` != 0
