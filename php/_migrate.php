@@ -18,7 +18,7 @@ if(!empty($o_postdata) && is_object($o_postdata)){
                     WHERE 
                         l.`username` != :name
                         AND l.`balance` > 0
-                        AND l.`userid` = (SELECT `userid` FROM `user` WHERE `username` = :name AND l.`network` = 'twitter')
+                        AND l.`userid` = (SELECT `userid` FROM `user` r WHERE `username` = :name AND r.`network` = 'twitter')
                         AND l.`network` = 'twitter'
                 ");
                 $query->bindParam(':name', $o_postdata->name);
