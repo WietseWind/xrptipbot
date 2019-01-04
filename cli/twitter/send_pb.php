@@ -10,7 +10,7 @@ require_once '_bootstrap.php';
 // ]));
 
 $to = preg_replace("@[^a-zA-Z0-9_\.-]@", "", (string) @$argv[1]);
-$amount = preg_replace("@\.$@", "", preg_replace("@[0]+$@", "", number_format(preg_replace("@[^0-9,\.]@", "", @$argv[2]), 8, '.', '')));
+$amount = preg_replace("@\.$@", "", preg_replace("@[0]+$@", "", number_format(preg_replace("@[^0-9,\.]@", "", number_format( (float) @$argv[2], 6 ) ), 8, '.', '')));
 
 $user = @$twitter_call('users/lookup', 'GET', [ 'screen_name' => $to ])[0]->id;
 if (!empty($user)) {
