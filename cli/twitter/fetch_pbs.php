@@ -11,13 +11,14 @@ $mentions = $twitter_call('/statuses/mentions_timeline', 'GET', [ 'count' => 200
 
 if(!empty($mentions)) {
     foreach($mentions as $m) {
+        //print_r($m);
         if (empty($m->full_text) && !empty($m->text)) {
             $m->full_text = $m->text;
         }
         $m->full_text = trim(preg_replace("@[ \t\r\n]+@", " ", @$m->full_text));
 
         $isMultiTip = false;
-        if (preg_match_all("/(@[a-zA-Z0-9\._-]+[ ]*\+[ ]*[0-9\.,]+[ ]*@xrptipbot)/mis", @$m->full_text, $multiTipMatch)) {
+        if (preg_match_all("/(@[a-zA-Z0-9_-]+[ ]*\+[ ]*[0-9\.,]+[ ]*@xrptipbot)/mis", @$m->full_text, $multiTipMatch)) {
             if (count($multiTipMatch[0]) > 1) {
                 $isMultiTip = true;
                 echo "\n\nMULTITIP\n\n";
@@ -35,7 +36,7 @@ if(!empty($mentions)) {
             // Starts with mention, possible thread
             if (!preg_match("@^\@xrptipbot@i", @$m->full_text)) {
                 // First mention isn't the TipBot
-                preg_match("/^(@[a-zA-Z0-9\._-]+ ){1,}/i", @$m->full_text, $all_prefixed_users);
+                preg_match("/^(@[a-zA-Z0-9_-]+ ){1,}/i", @$m->full_text, $all_prefixed_users);
                 if ($all_prefixed_users) {
                     if (strlen($all_prefixed_users[0]) < strlen(@$m->full_text) && preg_match("@[ ]+@", trim($all_prefixed_users[0]))) { // Multiple users
                         echo "\n\n{isThreadWithTipBotMentionedButNotByUser}:\n".$m->full_text."\n ==>";
@@ -54,7 +55,7 @@ if(!empty($mentions)) {
             // Check if specific typ syntax && reply but specific tip syntax should be used
             if ($multiTipMatch && is_array($multiTipMatch) && count($multiTipMatch[0]) == 1) {
                 // One time specific syntax, not multitip, 
-                if (preg_match("/[^@]+((@[a-zA-Z0-9\._-]+)[ ]*\+[ ]*[0-9\.,]+[ ]*@xrptipbot)/mis", @$m->full_text, $fakeParent)) {
+                if (preg_match("/[^@]+((@[a-zA-Z0-9_-]+)[ ]*\+[ ]*[0-9\.,]+[ ]*@xrptipbot)/mis", @$m->full_text, $fakeParent)) {
                    echo "\nREPLY, BUT SPECIFIC TIP SYNTAX: \n   [ " . $multiTipMatch[0][0] . ' ]';
                    $parentUser = preg_replace("/^@/", "", $fakeParent[2]);
                    echo "\n       Fake parent user: " . $parentUser . "\n";
