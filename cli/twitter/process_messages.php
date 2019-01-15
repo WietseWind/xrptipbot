@@ -21,13 +21,13 @@ for ($i=0; $i<20; $i++){
     try {
         $query = $db->prepare('
             SELECT
-            `message`.*,
-            `from`.`username` as _from_user_name,
-            `from`.`balance` as _from_user_balance,
-            `to`.`username` as _to_user_name,
-            `to`.`balance` as _to_user_balance,
-            `to`.`rejecttips` as _to_rejecttips,
-            `to`.`disablenotifications` as _to_disablenotifications
+                `message`.*,
+                `from`.`username` as _from_user_name,
+                `from`.`balance` as _from_user_balance,
+                `to`.`username` as _to_user_name,
+                `to`.`balance` as _to_user_balance,
+                `to`.`rejecttips` as _to_rejecttips,
+                `to`.`disablenotifications` as _to_disablenotifications
             FROM  `message`
             LEFT JOIN `user` as `from` ON (`from`.`username` = `message`.`from_user` AND `from`.`network` = `message`.`network`)
             LEFT JOIN `user` as `to` ON (`to`.`username` = `message`.`parent_author` AND `to`.`network` = `message`.`network`)
@@ -175,8 +175,9 @@ for ($i=0; $i<20; $i++){
                 } else {
                     // echo "NOTIFICATIONS TO TO_USER DISABLED";
             try {
-                $query = $db->prepare('UPDATE `message` SET `processed` = 1, processed_moment = CURRENT_TIMESTAMP WHERE `ext_id` = :ext_id LIMIT 1');
-                $query->bindValue(':ext_id', $m['ext_id']);
+                $query = $db->prepare('UPDATE `message` SET `processed` = 1, processed_moment = CURRENT_TIMESTAMP WHERE `id` = :id LIMIT 1');
+                // $query->bindValue(':ext_id', $m['ext_id']);
+                $query->bindValue(':id', $m['id']);
                 $query->execute();
             }
             catch (\Throwable $e) {
