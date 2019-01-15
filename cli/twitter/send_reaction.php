@@ -6,6 +6,7 @@ require_once '/data/db.php';
 $at_id = preg_replace("@[^a-zA-Z0-9:_\.-\/]@", "", (string) @$argv[1]);
 $parent_id = array_reverse(explode("/", $at_id))[0];
 $text = @$argv[2];
+$id = @$argv[3];
 $original_text = $text;
 
 if(!empty($original_text)){
@@ -75,8 +76,14 @@ if (empty($callbackurl)) {
 }
 
 try {
-    $query = $db->prepare('UPDATE `message` SET `processed` = 1, processed_moment = CURRENT_TIMESTAMP, action = :action, reaction = :reaction WHERE `ext_id` = :ext_id AND `network` = "twitter" LIMIT 10');
-    $query->bindValue(':ext_id', @$parent_id);
+    $field = 'ext_id';
+    if (!empty($id)) $field = 'id';
+    $query = $db->prepare('UPDATE `message` SET `processed` = 1, processed_moment = CURRENT_TIMESTAMP, action = :action, reaction = CONCAT(reaction, " -- ", :reaction) WHERE `'.$field.'` = :id AND `network` = "twitter" LIMIT 1');
+    if (!empty($id)) {
+        $query->bindValue(':id', @$id);
+    } else {
+        $query->bindValue(':id', @$parent_id);
+    }
     $query->bindValue(':reaction', @$callbackurl);
     $query->bindValue(':action', @$action);
     $query->execute();

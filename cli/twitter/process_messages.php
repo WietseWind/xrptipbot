@@ -13,8 +13,10 @@ if((int) @file_get_contents(dirname(__FILE__).'/'.'pid') > 0){
 file_put_contents(dirname(__FILE__).'/'.'pid', 1);
 
 sleep(2);
+$msg = '';
 
 for ($i=0; $i<20; $i++){
+    $msg = '';
     // Process 20 of them
     echo "Processing: $i / 20 ...\n\n";
     
@@ -166,12 +168,19 @@ for ($i=0; $i<20; $i++){
 
                 echo "      > " . $msg;
                 // Sending message ...
+                $query = $db->prepare('UPDATE `message` SET `reaction` = :reaction WHERE `id` = :id LIMIT 1');
+                // $query->bindValue(':ext_id', $m['ext_id']);
+                $query->bindValue(':reaction', @$msg);
+                $query->bindValue(':id', $m['id']);
+                $query->execute();
+
                 echo "\n--- Sending reply --- ... \n";
                 $to_post = $m['from_user']. '/status/' . $m['ext_id'];
                 $msg_escaped = str_replace("'", "'\"'\"'", $msg);
                 $msg_escaped = trim(preg_replace("@[ \t\r\n]+@", " ", $msg_escaped));
                 if ($m['_to_disablenotifications'] < 1) {
-                    echo `cd /data/cli/twitter; php send_reaction.php '$to_post' '$msg_escaped'`;
+                    $id = $m['id'];
+                    echo `cd /data/cli/twitter; php send_reaction.php '$to_post' '$msg_escaped' '$id'`;
                 } else {
                     // echo "NOTIFICATIONS TO TO_USER DISABLED";
             try {
