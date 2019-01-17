@@ -6,19 +6,22 @@ if(!empty($o_postdata) && is_object($o_postdata) && !empty($o_postdata->name)){
     if (!empty($o_postdata->limit)) {
         $limit = ' LIMIT ' . (int) $o_postdata->limit;
     }
+
+    $insertQuery = '
+        INSERT IGNORE INTO `user`
+            (`username`, `last_login`, `create_reason`, `network`, `userid`, `original_userid`)
+        VALUES
+            (:name, CURRENT_TIMESTAMP, "LOGIN", :network, :userid, :userid)
+    ';
+
     try {
         if (empty($o_postdata->stats)) {
-            $query = $db->prepare('
-                INSERT IGNORE INTO `user`
-                    (`username`, `last_login`, `create_reason`, `network`, `userid`)
-                VALUES
-                    (:name, CURRENT_TIMESTAMP, "LOGIN", :network, :userid)
-            ');
+            $query = $db->prepare($insertQuery);
             $query->bindParam(':name', $o_postdata->name);
             $query->bindParam(':network', $o_postdata->type);
             $userid = null;
             if (isset($o_postdata->userid)) {
-                $userid = $o_postdata->userid;
+                $userid = @$o_postdata->userid;
             }
             $query->bindParam(':userid', $userid);
             $query->execute();
@@ -30,8 +33,8 @@ if(!empty($o_postdata) && is_object($o_postdata) && !empty($o_postdata->name)){
 
         if(empty($insertId)){
             if (isset($o_postdata->userid)) {
-                $query = $db->prepare('UPDATE `user` SET `last_login` = CURRENT_TIMESTAMP, `userid` = :userid WHERE `username` = :name AND `network` = :network LIMIT 1');
-                $query->bindParam(':userid', $o_postdata->userid);
+                $query = $db->prepare('UPDATE `user` SET `last_login` = CURRENT_TIMESTAMP, `userid` = :userid, `original_userid` = IF(`original_userid` IS NULL, :userid, `original_userid`) WHERE `username` = :name AND `network` = :network AND (`original_userid` IS NULL OR `original_userid` = :userid) LIMIT 1');
+                $query->bindParam(':userid', @$o_postdata->userid);
             } else {
                 $query = $db->prepare('UPDATE `user` SET `last_login` = CURRENT_TIMESTAMP WHERE `username` = :name AND `network` = :network LIMIT 1');
             }
@@ -45,6 +48,25 @@ if(!empty($o_postdata) && is_object($o_postdata) && !empty($o_postdata->name)){
         $query->bindParam(':network', $o_postdata->type);
         $query->execute();
         $row = $query->fetchAll(PDO::FETCH_ASSOC);
+
+        if ($o_postdata->type == 'twitter' && empty($o_postdata->stats) && !empty($o_postdata->userid) && !empty($row[0]['userid']) && !empty($row[0]['original_userid']) && empty($o_postdata->nohistory)) {
+            // If Twitter, offer possible migrations, and check for faked user handle changes
+            if ($row[0]['userid'] !== $row[0]['original_userid'] || (!empty($o_postdata->userid) && (int) $row[0]['original_userid'] !== (int) $o_postdata->userid)) {
+                // Someone is trying to steal the abandoned user handle, park old account, insert new account. -- 1. Park old
+                $query = $db->prepare('UPDATE user SET username = CONCAT("!!!PARKED!!!'.time().'!!!", username), userid = "!!!PARKED!!!" WHERE destination_tag = :t AND original_userid = :i LIMIT 1');
+                $query->bindParam(':t', $row[0]['destination_tag']);
+                $query->bindParam(':i', $row[0]['original_userid']);
+                $query->execute();
+                // -- 2. Create new
+                $query = $db->prepare($insertQuery);
+                $query->bindParam(':name', $o_postdata->name);
+                $query->bindParam(':network', $o_postdata->type);
+                $query->bindParam(':userid', $o_postdata->userid);
+                $query->execute();
+
+                $insertId = (int) @$db->lastInsertId();
+            }
+        }
 
         if(empty($row[0]['public_destination_tag'])){
             // Fill the random public destination tag, for anonymous public deposits
@@ -100,19 +122,23 @@ if(!empty($o_postdata) && is_object($o_postdata) && !empty($o_postdata->name)){
         }
 
         if ($o_postdata->type == 'twitter') {
+            // If Twitter, offer possible migrations
             $query = $db->prepare("
                 SELECT 
-                    l.`username` u,
+                    REPLACE(l.`username`, '!!!PARKED!!!', '') u,
+                    l.`userid` i,
+                    l.`original_userid` o,
                     l.`balance` b
                 FROM 
                     `user` l 
                 WHERE 
                     l.`username` != :name
                     AND l.`balance` > 0
-                    AND l.`userid` = (SELECT `userid` FROM `user` WHERE `username` = :name AND l.`network` = 'twitter')
+                    AND l.`original_userid` = :o
                     AND l.`network` = 'twitter'
             ");
             $query->bindParam(':name', $o_postdata->name);
+            $query->bindParam(':o', $row[0]['original_userid']);
             $query->execute();
             $migrations = $query->fetchAll(PDO::FETCH_ASSOC);
         }
