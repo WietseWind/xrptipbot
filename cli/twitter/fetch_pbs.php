@@ -93,9 +93,9 @@ if(!empty($mentions)) {
                 try {
                     $query = $db->prepare('
                         INSERT IGNORE INTO `message`
-                            (`network`, `ext_id`, `parent_id`, `parent_author`, `type`, `from_user`, `to_user`, `message`, `context`)
+                            (`network`, `ext_id`, `parent_id`, `parent_author`, `type`, `from_user`, `to_user`, `message`, `context`, `author_id`)
                         VALUES
-                            ("twitter", :ext_id, :parent_id, :parent_author, :type, :from_user, :to_user, :message, :context)
+                            ("twitter", :ext_id, :parent_id, :parent_author, :type, :from_user, :to_user, :message, :context, :authorid)
                     ');
                     $message = html_entity_decode($m->full_text);
                     $type = 'mention';
@@ -105,6 +105,7 @@ if(!empty($mentions)) {
                     $tweetStartsWithMention = preg_match("@^\@[a-zA-Z0-9_]+@", $message);
 
                     $query->bindValue('ext_id',        @$m->id);
+                    $query->bindValue('authorid',      @$m->user->id_str);
                     if (!empty(@$m->in_reply_to_status_id) && !$toSelf && !$tweetStartsWithMention) {
                         $query->bindValue('parent_id',     @$m->in_reply_to_status_id);
                         $query->bindValue('parent_author', @$m->in_reply_to_screen_name);

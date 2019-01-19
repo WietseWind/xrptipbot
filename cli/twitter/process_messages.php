@@ -29,7 +29,10 @@ for ($i=0; $i<20; $i++){
                 `to`.`username` as _to_user_name,
                 `to`.`balance` as _to_user_balance,
                 `to`.`rejecttips` as _to_rejecttips,
-                `to`.`disablenotifications` as _to_disablenotifications
+                `to`.`disablenotifications` as _to_disablenotifications,
+                IF(`message`.`author_id` IS NOT NULL AND `from`.`original_userid` IS NOT NULL AND `message`.`author_id` != `from`.`original_userid`, 1, 0) as fake_user,
+                `message`.`author_id`,
+                `from`.`original_userid`
             FROM  `message`
             LEFT JOIN `user` as `from` ON (`from`.`username` = `message`.`from_user` AND `from`.`network` = `message`.`network`)
             LEFT JOIN `user` as `to` ON (`to`.`username` = `message`.`parent_author` AND `to`.`network` = `message`.`network`)
@@ -85,7 +88,9 @@ for ($i=0; $i<20; $i++){
                                             $query->execute();
                                         }
 
-                                        if($m['_from_user_balance'] < $amount){
+                                        if($m['fake_user'] > 0){
+                                            $msg = '@'.$m['from_user'].' Oops. Something wrong. Looks like your Tweet is sent by another user. Contact @WietseWind if you think this is not supposed to happen.';
+                                        }elseif($m['_from_user_balance'] < $amount){
                                             $msg = '@'.$m['from_user'].' Awwww... Your Tip Bot balance is too low :( Please deposit some XRP at https://www.xrptipbot.com/deposit first and tip @'.$m['parent_author'].' again.';
                                         }else{
                                             if(strtolower($m['parent_author']) == 'xrptipbot'){
@@ -101,7 +106,7 @@ for ($i=0; $i<20; $i++){
                                                     'Awesome, you received',
                                                     'Woohoo :) Tip time'
                                                 ];
-                                                $msg = '@' . $m['parent_author'] . ' ' . $prefix[array_rand($prefix)] . ': ' . $amount . ' XRP' . $usdamount . ' from @' . $m['from_user'] . ' ';
+                                                $msg = '@' . $m['parent_author'] . ' ' . $prefix[array_rand($prefix)] . ': ' . number_format($amount, 6, '.', '') . ' XRP' . $usdamount . ' from @' . $m['from_user'] . ' ';
                                                 // Disable, move to PM
                                                 // $msg = '';
                                                 if(empty($m['_to_user_name'])){
