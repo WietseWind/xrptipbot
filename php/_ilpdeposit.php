@@ -1,6 +1,6 @@
 <?php
 
-if(!empty($o_postdata) && is_object($o_postdata) && ($_SERVER["HTTP_HOST"] == 'xrptipbot.internal:10060' || $_SERVER["HTTP_HOST"] == '127.0.0.1')){
+if(!empty($o_postdata) && is_object($o_postdata) && ($_SERVER['HTTP_HOST'] === 'xrptipbot.internal:10060' || $_SERVER['HTTP_HOST'] === '127.0.0.1')){
     $fee = 0;
     $insertId = 0;
     $channel = '';
@@ -80,7 +80,7 @@ if(!empty($o_postdata) && is_object($o_postdata) && ($_SERVER["HTTP_HOST"] == 'x
                          **/
                         $postdata = [ 'name' => 'deposit', 'data' => json_encode([
                             'txInsertId' => $insertId,
-                            'amount' => preg_replace("@\.$@", "", preg_replace("@[0]+$@", "", number_format($amount + ($fee / 1000000), 6, '.', ''))),
+                            'amount' => preg_replace("@\.$@", '', preg_replace('@[0]+$@', '', number_format($amount + ($fee / 1000000), 6, '.', ''))),
                             'user' => $user->username,
                             'transaction' => $o_postdata,
                             'drops' => $o_postdata->totalDrops,

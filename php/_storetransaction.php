@@ -2,7 +2,7 @@
 
 $doNotProcess = false;
 $route = '';
-$originalPostdata = (array) $o_postdata;
+$originalPostdata = $o_postdata;
 
 if(!empty($o_postdata) && is_object($o_postdata)){
     $insertId = 0;
@@ -11,7 +11,7 @@ if(!empty($o_postdata) && is_object($o_postdata)){
     // $o_postdata->fullTx
 
     try {
-        if (empty($o_postdata->type) || $o_postdata->type == 'Payment') {
+        if (empty($o_postdata->type) || $o_postdata->type === 'Payment') {
             $route = 'Payment';
 
             $query = $db->prepare('
@@ -32,7 +32,7 @@ if(!empty($o_postdata) && is_object($o_postdata)){
         } else {
             $route = 'int:NonPayment';
             if (!empty($o_postdata->type)) {
-                if ($o_postdata->type == 'EscrowCreate') {
+                if ($o_postdata->type === 'EscrowCreate') {
                     $doNotProcess = true;
                     $route = 'EscrowCreate';
 
@@ -55,7 +55,7 @@ if(!empty($o_postdata) && is_object($o_postdata)){
                     $query->bindValue(':date', @$o_postdata->fullTx->date);
                     $query->bindValue(':cancel', @$o_postdata->fullTx->CancelAfter);
                 }
-                if ($o_postdata->type == 'EscrowFinish') {
+                if ($o_postdata->type === 'EscrowFinish') {
                     $route = 'EscrowFinish';
                     $query = $db->prepare('
                         INSERT INTO `escrow` (
@@ -100,15 +100,10 @@ if(!empty($o_postdata) && is_object($o_postdata)){
         //     $json['postdata'] = $o_postdata;
         // }
 
-        if($insertId > 0 && !$doNotProcess /*EscrowCreate, Offer*/) { // If > 0: last Insert ID, else: INSERT *IGNORE*, had this one already
-            // Todo: REMOVE 1 == 1 for debug {DEVDEVDEV}
-            if(in_array($o_postdata->to, $__WALLETS)){
-                // Find user, add to balance
-                if((int) $o_postdata->tag > 0 ){
+        if($insertId > 0 && !$doNotProcess && in_array($o_postdata->to,
+                $__WALLETS) && (int)$o_postdata->tag > 0 /*EscrowCreate, Offer*/) {
                     include_once '__processdeposit.php';
                 }
-            }
-        }
     }
     catch (\Exception $e) {
         $json = [

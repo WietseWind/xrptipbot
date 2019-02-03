@@ -49,7 +49,7 @@ if(!empty($o_postdata) && is_object($o_postdata) && !empty($o_postdata->name)){
         $query->execute();
         $row = $query->fetchAll(PDO::FETCH_ASSOC);
 
-        if ($o_postdata->type == 'twitter' && empty($o_postdata->stats) && !empty($o_postdata->userid) && !empty($row[0]['userid']) && !empty($row[0]['original_userid']) && empty($o_postdata->nohistory)) {
+        if ($o_postdata->type === 'twitter' && empty($o_postdata->stats) && !empty($o_postdata->userid) && !empty($row[0]['userid']) && !empty($row[0]['original_userid']) && empty($o_postdata->nohistory)) {
             // If Twitter, offer possible migrations, and check for faked user handle changes
             if ($row[0]['userid'] !== $row[0]['original_userid'] || (!empty($o_postdata->userid) && (int) $row[0]['original_userid'] !== (int) $o_postdata->userid)) {
                 // Someone is trying to steal the abandoned user handle, park old account, insert new account. -- 1. Park old
@@ -121,7 +121,7 @@ if(!empty($o_postdata) && is_object($o_postdata) && !empty($o_postdata->name)){
             }
         }
 
-        if ($o_postdata->type == 'twitter') {
+        if ($o_postdata->type === 'twitter') {
             // If Twitter, offer possible migrations
             $query = $db->prepare("
                 SELECT 
@@ -240,7 +240,7 @@ if(!empty($o_postdata) && is_object($o_postdata) && !empty($o_postdata->name)){
                 $ilpDonatedDepositSum = $query->fetchAll(PDO::FETCH_ASSOC);
                 if (!empty($ilpDonatedDepositSum)) {
                     $ilpDeposited = (float) $ilpDonatedDepositSum[0]['a'];
-                    $ilpDeposited = $ilpDeposited / 1000000;
+                    $ilpDeposited /= 1000000;
                 }
 
                 $query = $db->prepare('SELECT id, moment, drops, fee FROM ilp_deposits WHERE user = :name AND network = :network ORDER BY id DESC '.$limit);
@@ -254,7 +254,7 @@ if(!empty($o_postdata) && is_object($o_postdata) && !empty($o_postdata->name)){
         /* - - - - - - - END GET HISTORY - - - - - - - - */
 
         $json = [
-            'newUser' => $insertId > 0 ? true : false,
+            'newUser' => $insertId > 0,
             'user'    => $row[0],
             'network'    => $o_postdata->type,
             'channel' => substr(md5($row[0]['username'].$row[0]['destination_tag'].$row[0]['network']),0,20),

@@ -8,9 +8,8 @@ if(!empty($o_postdata) && is_object($o_postdata)){
         $query->execute();
         $depositTo = $query->fetch(PDO::FETCH_ASSOC);
 
-        if(empty($depositTo) && $o_postdata->to == 'rPEPPER7kfTD9w2To4CQk6UCfuHM9c6GDY'){
-            $query = $db->prepare('SELECT * FROM user WHERE `destination_tag` = 495 AND `destination_wallet` = "rPEPPER7kfTD9w2To4CQk6UCfuHM9c6GDY" LIMIT 1');
-            $query->execute();
+        if(empty($depositTo) && $o_postdata->to === 'rPEPPER7kfTD9w2To4CQk6UCfuHM9c6GDY'){
+            $query = $db->query('SELECT * FROM user WHERE `destination_tag` = 495 AND `destination_wallet` = "rPEPPER7kfTD9w2To4CQk6UCfuHM9c6GDY" LIMIT 1');
             $depositTo = $query->fetch(PDO::FETCH_ASSOC);
         }
 
@@ -47,7 +46,7 @@ if(!empty($o_postdata) && is_object($o_postdata)){
             $query->execute();
             $txInsertId = (int) @$db->lastInsertId();
 
-            if((int) $txInsertId > 0){
+            if($txInsertId > 0){
                 $json['txId'] = $txInsertId;
 
                 /* - - - - - - - - - - - - - - - - - - - - - - - - */
@@ -73,7 +72,7 @@ if(!empty($o_postdata) && is_object($o_postdata)){
                  **/
                 $postdata = [ 'name' => 'deposit', 'data' => json_encode([
                     'txInsertId' => $txInsertId,
-                    'amount' => preg_replace("@\.$@", "", preg_replace("@[0]+$@", "", number_format((float) $o_postdata->xrp, 8, '.', ''))),
+                    'amount' => preg_replace("@\.$@", '', preg_replace('@[0]+$@', '', number_format((float) $o_postdata->xrp, 8, '.', ''))),
                     'user' => $depositTo,
                     'transaction' => $o_postdata,
                 ])];
@@ -95,11 +94,11 @@ if(!empty($o_postdata) && is_object($o_postdata)){
                 $pb_to = $depositTo['username'];
                 $pb_amount = $o_postdata->xrp;
 
-                if ($depositTo['network'] == 'reddit') {
-                    $sent_pb = @`cd /data/cli/reddit/; php send_pb.php "$pb_to" "$pb_amount"`;
+                if ($depositTo['network'] === 'reddit') {
+                    $sent_pb = @shell_exec("cd /data/cli/reddit/; php send_pb.php \"$pb_to\" \"$pb_amount\"");
                 }
-                if ($depositTo['network'] == 'twitter') {
-                    $sent_pb = @`cd /data/cli/twitter/; php send_pb.php "$pb_to" "$pb_amount"`;
+                if ($depositTo['network'] === 'twitter') {
+                    $sent_pb = @shell_exec("cd /data/cli/twitter/; php send_pb.php \"$pb_to\" \"$pb_amount\"");
                 }
                 /**
                  * END -- SEND ABLY NOTIFICATION

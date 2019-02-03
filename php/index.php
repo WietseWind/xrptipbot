@@ -16,8 +16,8 @@ if(is_string($s_postdata) && !empty($s_postdata)){
 
 if(isset($_SERVER['PATH_INFO'])){
     $s_path = preg_replace("@^\/+@", '', $_SERVER['PATH_INFO']);
-    $a_path = explode("/", $s_path);
-    if(preg_match("@^[a-z]+$@", $a_path[0])){
+    $a_path = explode('/', $s_path);
+    if(preg_match('@^[a-z]+$@', $a_path[0])){
         $module = '_'.$a_path[0].'.php';
         if(file_exists($module)){
             include_once $module;

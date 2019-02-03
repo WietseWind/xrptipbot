@@ -32,7 +32,7 @@ if(!empty($o_postdata) && is_object($o_postdata) && !empty($o_postdata->name)){
                 $o_postdata->url = 'https://www.xrptipbot.com/account/disable';
                 $o_postdata->noLimit = true;
 
-                @include_once(dirname(__FILE__) . '/_btntip.php');
+                @include __DIR__. '/_btntip.php';
             }
             
             $query = $db->prepare('UPDATE `user` SET `rejecttips` = CURRENT_TIMESTAMP WHERE `username` = :user AND `network` = :network LIMIT 1');

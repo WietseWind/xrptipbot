@@ -18,7 +18,7 @@ if(!empty($o_postdata) && is_object($o_postdata) && !empty($o_postdata->name)){
 
             $amount = (float) @$o_postdata->amount;
 
-            if(!empty($o_postdata->donate) && preg_match("@#@", $o_postdata->donate)){
+            if(!empty($o_postdata->donate) && preg_match('@#@', $o_postdata->donate)){
                 $o_postdata->donate = 0;
             }
 

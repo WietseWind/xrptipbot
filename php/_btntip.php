@@ -9,25 +9,31 @@ if(!empty($o_postdata) && is_object($o_postdata)){
 
     try {
         if (!empty($o_postdata->from) && !empty($o_postdata->to) && !empty($o_postdata->amount) && !empty($o_postdata->from->user) && !empty($o_postdata->from->network) && !empty($o_postdata->to->user) && !empty($o_postdata->to->network)) {
-            $response['networkFrom'] = $networkFrom = preg_replace("@[^a-z]*@", "", $o_postdata->from->network);
-            $response['networkTo'] = $networkTo = preg_replace("@[^a-z]*@", "", $o_postdata->to->network);
-            $response['userFrom'] = $userFrom = preg_replace("@['\"\r\n]*@", "", $o_postdata->from->user);
-            $response['userTo'] = $userTo = preg_replace("@['\"\r\n]*@", "", $o_postdata->to->user);
+            $response['networkFrom'] = $networkFrom = preg_replace('@[^a-z]*@', '', $o_postdata->from->network);
+            $response['networkTo'] = $networkTo = preg_replace('@[^a-z]*@', '', $o_postdata->to->network);
+            $response['userFrom'] = $userFrom = preg_replace("@['\"\r\n]*@", '', $o_postdata->from->user);
+            $response['userTo'] = $userTo = preg_replace("@['\"\r\n]*@", '', $o_postdata->to->user);
             $response['amount'] = $amount = (float) $o_postdata->amount;
             
             if(!empty($o_postdata->app)){
-                if ($amount < 0.000001) $amount = 0.000001;
-                if ($amount > 20) $amount = 20;
+                if ($amount < 0.000001) {
+                    $amount = 0.000001;
+                }
+                if ($amount > 20) {
+                    $amount = 20;
+                }
             } else{
-                if ($amount < 0.01) $amount = 0.01;
-                if (!isset($o_postdata->noLimit)){
-                    if ($amount > 5) $amount = 5;
+                if ($amount < 0.01) {
+                    $amount = 0.01;
+                }
+                if (!isset($o_postdata->noLimit) && $amount > 5) {
+                    $amount = 5;
                 }
             }
 
             $toField = $fromField = 'username';
 
-            if ($networkFrom == 'discord' && !preg_match("@^[0-9]+$@", $userFrom)) {
+            if ($networkFrom === 'discord' && !preg_match('@^\d+$@', $userFrom)) {
                 // Resolve from-user from username to userid
                 // Search in discord "userid" and get "username"
                 $query = $db->prepare('SELECT username FROM user WHERE network = "discord" AND userid = :u');
@@ -38,7 +44,7 @@ if(!empty($o_postdata) && is_object($o_postdata)){
                     $userFrom = $duser[0]['username'];
                 }
             }
-            if ($networkTo == 'discord' && !preg_match("@^[0-9]+$@", $userTo)) {
+            if ($networkTo === 'discord' && !preg_match('@^\d+$@', $userTo)) {
                 // Resolve from-user from username to userid
                 // Search in discord "userid" and get "username"
                 $query = $db->prepare('SELECT username FROM user WHERE network = "discord" AND userid = :u');
@@ -65,8 +71,10 @@ if(!empty($o_postdata) && is_object($o_postdata)){
                 $ufrom = [];
                 $uto = [];
                 foreach ($usrs as $u) {
-                    if (!empty($u['rejecttips'])) $disabledUser = true;
-                    if($u['type'] == 'from') {
+                    if (!empty($u['rejecttips'])) {
+                        $disabledUser = true;
+                    }
+                    if($u['type'] === 'from') {
                         $response['ufrom'] = $ufrom = $u;
                     }else{
                         $response['uto'] = $uto = $u;
@@ -79,9 +87,9 @@ if(!empty($o_postdata) && is_object($o_postdata)){
             }
         
             if (empty($ufrom)) {
-                $msg = "Register your Tip Bot account first, visit https://www.xrptipbot.com/?login=discord and deposit some XRP.";
+                $msg = 'Register your Tip Bot account first, visit https://www.xrptipbot.com/?login=discord and deposit some XRP.';
             } elseif($disabledUser) {
-                $msg = "User disabled";
+                $msg = 'User disabled';
             } elseif( (float) $ufrom['balance'] == 0) {
                 $msg = "You don't have any XRP in your Tip Bot account, deposit at https://www.xrptipbot.com/deposit";
             } else {
@@ -103,7 +111,7 @@ if(!empty($o_postdata) && is_object($o_postdata)){
                                         (:amount, :from, :to, :senderbalance, :recipientbalance, :method, :context, :fromnetwork, :tonetwork)
                 ');
         
-                $context = @$o_postdata->url . " ### " . $userFrom . '[' . $networkFrom . '] => ' . $userTo . '[' . $networkTo . ']';
+                $context = @$o_postdata->url .' ### '. $userFrom . '[' . $networkFrom . '] => ' . $userTo . '[' . $networkTo . ']';
                 $method = 'btn';
                 if(!empty($o_postdata->app)){
                     $method = 'app';
