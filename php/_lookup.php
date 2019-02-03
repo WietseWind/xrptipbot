@@ -3,7 +3,7 @@
 if(!empty($o_postdata) && is_object($o_postdata)){
     try {
         $json['lookup'] = (string) @$o_postdata->query;
-        if (preg_match("@rPEPPER7kfTD9w2To4CQk6UCfuHM9c6GDY.+dt=([0-9]+)@", $json['lookup'], $m)) {
+        if (preg_match('@rPEPPER7kfTD9w2To4CQk6UCfuHM9c6GDY.+dt=(\d+)@', $json['lookup'], $m)) {
             $query = $db->prepare('
                 SELECT 
                     IF(`user`.`network` != "discord", `user`.username, `user`.userid) as slug,
@@ -34,7 +34,7 @@ if(!empty($o_postdata) && is_object($o_postdata)){
             $query->bindParam(':tag', $m[1]);
         } else {
             $json['wildcard'] = '';
-            for ($i=0;$i<strlen($json['lookup']);$i++) {
+            for ($i=0, $iMax = strlen($json['lookup']); $i< $iMax; $i++) {
                 $json['wildcard'] .= $json['lookup']{$i}.'%';
             }
             $query = $db->prepare('

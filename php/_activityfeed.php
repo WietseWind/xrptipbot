@@ -4,13 +4,17 @@ $limit = 1000;
 
 if(!empty($o_postdata) && is_object($o_postdata)){
     $skip = 0;
-    if (!empty($_GET["skip"])) {
-        $skip = (int) $_GET["skip"];
+    if (!empty($_GET['skip'])) {
+        $skip = (int) $_GET['skip'];
     }
-    if (!empty($_GET["limit"])) {
-        $limit = (int) $_GET["limit"];
-        if ($limit < 10) $limit = 10;
-        if ($limit > 10000) $limit = 10000;
+    if (!empty($_GET['limit'])) {
+        $limit = (int) $_GET['limit'];
+        if ($limit < 10) {
+            $limit = 10;
+        }
+        if ($limit > 10000) {
+            $limit = 10000;
+        }
     }
     
     $subqLimit = '';
@@ -19,7 +23,7 @@ if(!empty($o_postdata) && is_object($o_postdata)){
     }
 
     try {
-        if (!empty($_GET["ilp"])) {
+        if (!empty($_GET['ilp'])) {
             $query = $db->prepare("
                 SELECT
                     G1.*,
@@ -128,7 +132,7 @@ if(!empty($o_postdata) && is_object($o_postdata)){
         $query->execute();
         $json['feed'] = $query->fetchAll(PDO::FETCH_ASSOC);
 
-        $query = $db->prepare("
+        $query = $db->prepare('
             SELECT
                 `balance`,
                 `fee`,
@@ -144,7 +148,7 @@ if(!empty($o_postdata) && is_object($o_postdata)){
                     (SELECT sum(`amount`) as `sum` FROM `tip`) as `sum`,
                     (SELECT sum(`drops`) / 1000000 as `ilpsum` FROM `ilp_deposits`) as `ilpsum`
             ) G2
-        ");
+        ');
         $query->execute();
         $json['stats'] = $query->fetch(PDO::FETCH_ASSOC);
     }
